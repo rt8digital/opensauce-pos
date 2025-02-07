@@ -25,7 +25,7 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="flex-1 p-4">
-        <ScrollArea className="h-[calc(100vh-250px)]">
+        <ScrollArea className="h-[calc(100vh-350px)]">
           {items.map(({ product, quantity }) => (
             <div key={product.id} className="flex items-center justify-between py-2 border-b">
               <div className="flex-1">
@@ -34,7 +34,7 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
                   ${Number(product.price).toFixed(2)} × {quantity}
                 </p>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -44,9 +44,9 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
-                
+
                 <span className="w-8 text-center">{quantity}</span>
-                
+
                 <Button
                   variant="outline"
                   size="icon"
@@ -54,7 +54,7 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
-                
+
                 <Button
                   variant="destructive"
                   size="icon"
@@ -67,7 +67,7 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
           ))}
         </ScrollArea>
       </CardContent>
-      
+
       <div className="p-4 border-t">
         <div className="flex justify-between mb-4">
           <span className="text-lg font-semibold">Total</span>
@@ -75,7 +75,7 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
             ${total.toFixed(2)}
           </span>
         </div>
-        
+
         <Button 
           className="w-full" 
           size="lg"

@@ -140,8 +140,8 @@ export default function POS() {
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="flex-1 p-4 flex flex-col">
+    <div className="flex h-screen overflow-hidden">
+      <div className="flex-1 p-4 flex flex-col h-full">
         <div className="flex gap-4 mb-4">
           <Button onClick={() => navigate('/inventory')} variant="outline">
             <Plus className="mr-2 h-4 w-4" />
@@ -174,7 +174,7 @@ export default function POS() {
         </div>
       </div>
 
-      <div className="w-[400px] border-l flex flex-col">
+      <div className="w-[400px] border-l flex flex-col h-full">
         <div className="flex-1">
           <Cart
             items={cart}
@@ -183,7 +183,7 @@ export default function POS() {
             onCheckout={() => setShowPayment(true)}
           />
         </div>
-        <div className="p-4 border-t">
+        <div className="border-t">
           <NumericKeypad
             onPLUSubmit={handlePLUSubmit}
             onSettingsClick={handleSettingsClick}
