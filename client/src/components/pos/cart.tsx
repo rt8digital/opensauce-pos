@@ -24,43 +24,46 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
 
   return (
     <Card className="h-full flex flex-col">
-      <CardContent className="flex-1 p-4">
-        <ScrollArea className="h-[calc(100vh-350px)]">
+      <CardContent className="flex-1 p-3">
+        <ScrollArea className="h-[calc(100vh-400px)]">
           {items.map(({ product, quantity }) => (
-            <div key={product.id} className="flex items-center justify-between py-2 border-b">
+            <div key={product.id} className="flex items-center justify-between py-1.5 border-b last:border-0">
               <div className="flex-1">
-                <h3 className="font-medium">{product.name}</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-medium text-sm">{product.name}</h3>
+                <p className="text-xs text-muted-foreground">
                   ${Number(product.price).toFixed(2)} × {quantity}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
                   size="icon"
+                  className="h-6 w-6"
                   onClick={() => onUpdateQuantity(product.id, -1)}
                   disabled={quantity <= 1}
                 >
-                  <Minus className="h-4 w-4" />
+                  <Minus className="h-3 w-3" />
                 </Button>
 
-                <span className="w-8 text-center">{quantity}</span>
+                <span className="w-5 text-center text-sm">{quantity}</span>
 
                 <Button
                   variant="outline"
                   size="icon"
+                  className="h-6 w-6"
                   onClick={() => onUpdateQuantity(product.id, 1)}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3 w-3" />
                 </Button>
 
                 <Button
                   variant="destructive"
                   size="icon"
+                  className="h-6 w-6 ml-1"
                   onClick={() => onRemoveItem(product.id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
             </div>
@@ -68,8 +71,8 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
         </ScrollArea>
       </CardContent>
 
-      <div className="p-4 border-t">
-        <div className="flex justify-between mb-4">
+      <div className="p-2 border-t bg-muted/50">
+        <div className="flex justify-between mb-2">
           <span className="text-lg font-semibold">Total</span>
           <span className="text-lg font-semibold">
             ${total.toFixed(2)}
