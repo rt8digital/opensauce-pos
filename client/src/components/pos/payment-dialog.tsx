@@ -15,9 +15,16 @@ interface PaymentDialogProps {
   onOpenChange: (open: boolean) => void;
   total: number;
   onProcessPayment: (method: string) => void;
+  currency?: string;
 }
 
-export function PaymentDialog({ open, onOpenChange, total, onProcessPayment }: PaymentDialogProps) {
+export function PaymentDialog({ 
+  open, 
+  onOpenChange, 
+  total, 
+  onProcessPayment,
+  currency = '$'
+}: PaymentDialogProps) {
   const [method, setMethod] = React.useState('card');
   const [qrStatus, setQrStatus] = React.useState<'waiting' | 'received' | null>(null);
 
@@ -50,7 +57,7 @@ export function PaymentDialog({ open, onOpenChange, total, onProcessPayment }: P
         <div className="py-6">
           <div className="mb-6 text-center">
             <span className="text-3xl font-bold">
-              ${total.toFixed(2)}
+              {currency}{total.toFixed(2)}
             </span>
           </div>
 

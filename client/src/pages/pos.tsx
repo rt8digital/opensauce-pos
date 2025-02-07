@@ -6,16 +6,18 @@ import { Cart } from '@/components/pos/cart';
 import { PaymentDialog } from '@/components/pos/payment-dialog';
 import { ReceiptDialog } from '@/components/pos/receipt';
 import { NumericKeypad } from '@/components/pos/numeric-keypad';
+import { ProductForm } from '@/components/inventory/product-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiRequest } from '@/lib/queryClient';
 import { scanner } from '@/lib/scanner';
 import { Button } from '@/components/ui/button';
-import { Plus, Scan, Database } from 'lucide-react';
+import { Plus, Database } from 'lucide-react';
 import type { Product, Order } from '@shared/schema';
 import { indexedDB } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
 
 interface CartItem {
-  product: Product;
+  product: Product | { id: number; name: string; price: string };
   quantity: number;
 }
 
@@ -24,12 +26,12 @@ export default function POS() {
   const [cart, setCart] = React.useState<CartItem[]>([]);
   const [showPayment, setShowPayment] = React.useState(false);
   const [showReceipt, setShowReceipt] = React.useState(false);
+  const [showAddItem, setShowAddItem] = React.useState(false);
   const [currentOrder, setCurrentOrder] = React.useState<Order | null>(null);
-  const [scanning, setScanning] = React.useState(false);
-  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [currency, setCurrency] = React.useState('$');
   const { toast } = useToast();
 
-  const { data: products = [] } = useQuery({
+  const { data: products = [] } = useQuery<Product[]>({
     queryKey: ['/api/products'],
   });
 
@@ -75,6 +77,19 @@ export default function POS() {
     });
   };
 
+  const handleAddAmount = (amount: string) => {
+    const id = Date.now();
+    const item = {
+      product: {
+        id,
+        name: 'Custom Amount',
+        price: amount,
+      },
+      quantity: 1,
+    };
+    setCart(prev => [...prev, item]);
+  };
+
   const handleUpdateQuantity = (productId: number, delta: number) => {
     setCart(prev =>
       prev.map(item =>
@@ -111,46 +126,18 @@ export default function POS() {
   };
 
   const handleSettingsClick = () => {
+    // TODO: Implement settings dialog with currency, scanner and printer configuration
     toast({
       title: "Settings",
       description: "Settings functionality coming soon!"
     });
   };
 
-  const toggleScanner = async () => {
-    if (scanning) {
-      scanner.stop();
-      setScanning(false);
-    } else {
-      try {
-        await scanner.start(videoRef.current!, async (barcode) => {
-          const response = await fetch(`/api/products/barcode/${barcode}`);
-          if (response.ok) {
-            const product = await response.json();
-            handleAddToCart(product);
-            toast({
-              title: "Product Added",
-              description: `${product.name} has been added to the cart.`
-            });
-          }
-        });
-        setScanning(true);
-      } catch (error) {
-        console.error('Failed to start scanner:', error);
-        toast({
-          title: "Scanner Error",
-          description: "Failed to start the barcode scanner.",
-          variant: "destructive"
-        });
-      }
-    }
-  };
-
   return (
     <div className="flex h-screen overflow-hidden">
       <div className="flex-1 p-4 flex flex-col h-full">
         <div className="flex gap-4 mb-4">
-          <Button onClick={() => navigate('/inventory')} variant="outline">
+          <Button onClick={() => setShowAddItem(true)} variant="outline">
             <Plus className="mr-2 h-4 w-4" />
             Add Item
           </Button>
@@ -158,20 +145,7 @@ export default function POS() {
             <Database className="mr-2 h-4 w-4" />
             View All Items
           </Button>
-          <Button onClick={toggleScanner} variant="outline">
-            <Scan className="mr-2 h-4 w-4" />
-            {scanning ? 'Stop Scanner' : 'Start Scanner'}
-          </Button>
         </div>
-
-        {scanning && (
-          <video
-            ref={videoRef}
-            className="mb-4 w-full max-w-md"
-            autoPlay
-            playsInline
-          />
-        )}
 
         <div className="flex-1 overflow-auto">
           <ProductGrid
@@ -182,21 +156,48 @@ export default function POS() {
       </div>
 
       <div className="w-[400px] border-l flex flex-col h-full">
-        <div className="flex-1">
-          <Cart
-            items={cart}
-            onUpdateQuantity={handleUpdateQuantity}
-            onRemoveItem={handleRemoveItem}
-            onCheckout={() => setShowPayment(true)}
-          />
-        </div>
+        <Cart
+          items={cart}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemoveItem={handleRemoveItem}
+          onCheckout={() => setShowPayment(true)}
+          currency={currency}
+        />
         <div className="border-t">
           <NumericKeypad
             onPLUSubmit={handlePLUSubmit}
             onSettingsClick={handleSettingsClick}
+            onAddAmount={handleAddAmount}
           />
         </div>
       </div>
+
+      <Dialog open={showAddItem} onOpenChange={setShowAddItem}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Product</DialogTitle>
+          </DialogHeader>
+          <ProductForm
+            onSubmit={async (data) => {
+              try {
+                const response = await apiRequest('POST', '/api/products', data);
+                const newProduct = await response.json();
+                toast({
+                  title: 'Product Added',
+                  description: 'The new product has been added successfully.',
+                });
+                setShowAddItem(false);
+              } catch (error) {
+                toast({
+                  title: 'Error',
+                  description: 'Failed to add the product.',
+                  variant: 'destructive',
+                });
+              }
+            }}
+          />
+        </DialogContent>
+      </Dialog>
 
       <PaymentDialog
         open={showPayment}
@@ -205,6 +206,7 @@ export default function POS() {
           sum + (Number(item.product.price) * item.quantity), 0
         )}
         onProcessPayment={handleProcessPayment}
+        currency={currency}
       />
 
       {currentOrder && (
@@ -212,6 +214,7 @@ export default function POS() {
           open={showReceipt}
           onOpenChange={setShowReceipt}
           order={currentOrder}
+          currency={currency}
         />
       )}
     </div>

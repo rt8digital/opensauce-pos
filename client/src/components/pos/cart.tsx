@@ -6,7 +6,7 @@ import { Trash2, Plus, Minus } from 'lucide-react';
 import type { Product } from '@shared/schema';
 
 interface CartItem {
-  product: Product;
+  product: Product | { id: number; name: string; price: string };
   quantity: number;
 }
 
@@ -15,23 +15,24 @@ interface CartProps {
   onUpdateQuantity: (productId: number, delta: number) => void;
   onRemoveItem: (productId: number) => void;
   onCheckout: () => void;
+  currency?: string;
 }
 
-export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: CartProps) {
+export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout, currency = '$' }: CartProps) {
   const total = items.reduce((sum, item) => 
     sum + (Number(item.product.price) * item.quantity), 0
   );
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-[50vh] flex flex-col">
       <CardContent className="flex-1 p-3">
-        <ScrollArea className="h-[calc(100vh-400px)]">
+        <ScrollArea className="h-[calc(50vh-120px)]">
           {items.map(({ product, quantity }) => (
             <div key={product.id} className="flex items-center justify-between py-1.5 border-b last:border-0">
               <div className="flex-1">
                 <h3 className="font-medium text-sm">{product.name}</h3>
                 <p className="text-xs text-muted-foreground">
-                  ${Number(product.price).toFixed(2)} × {quantity}
+                  {currency}{Number(product.price).toFixed(2)} × {quantity}
                 </p>
               </div>
 
@@ -75,7 +76,7 @@ export function Cart({ items, onUpdateQuantity, onRemoveItem, onCheckout }: Cart
         <div className="flex justify-between mb-2">
           <span className="text-lg font-semibold">Total</span>
           <span className="text-lg font-semibold">
-            ${total.toFixed(2)}
+            {currency}{total.toFixed(2)}
           </span>
         </div>
 

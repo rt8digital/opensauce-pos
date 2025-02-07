@@ -6,9 +6,10 @@ import { Settings } from 'lucide-react';
 interface NumericKeypadProps {
   onPLUSubmit: (plu: string) => void;
   onSettingsClick: () => void;
+  onAddAmount: (amount: string) => void;
 }
 
-export function NumericKeypad({ onPLUSubmit, onSettingsClick }: NumericKeypadProps) {
+export function NumericKeypad({ onPLUSubmit, onSettingsClick, onAddAmount }: NumericKeypadProps) {
   const [display, setDisplay] = React.useState('');
   const [operator, setOperator] = React.useState<string | null>(null);
   const [firstNumber, setFirstNumber] = React.useState<number | null>(null);
@@ -66,8 +67,11 @@ export function NumericKeypad({ onPLUSubmit, onSettingsClick }: NumericKeypadPro
     setNewNumber(true);
   };
 
-  const handleBackspace = () => {
-    setDisplay(prev => prev.slice(0, -1));
+  const handleAddAmount = () => {
+    if (display && !operator) {
+      onAddAmount(display);
+      handleClear();
+    }
   };
 
   const handleEnter = () => {
@@ -78,7 +82,7 @@ export function NumericKeypad({ onPLUSubmit, onSettingsClick }: NumericKeypadPro
   };
 
   return (
-    <div className="p-1.5 bg-card rounded-lg border shadow-sm">
+    <div className="h-[calc(50vh-65px)] flex flex-col p-1.5 bg-card rounded-lg border shadow-sm">
       <div className="flex items-center gap-1.5 mb-1.5">
         <Input
           value={display}
@@ -91,12 +95,12 @@ export function NumericKeypad({ onPLUSubmit, onSettingsClick }: NumericKeypadPro
         </Button>
       </div>
 
-      <div className="grid grid-cols-4 gap-0.5">
+      <div className="flex-1 grid grid-cols-4 gap-1">
         {[7, 8, 9, '+', 4, 5, 6, '-', 1, 2, 3, '*', 'C', 0, '=', '/'].map((key) => (
           <Button
             key={key}
             variant={typeof key === 'string' && key !== 'C' ? "secondary" : "outline"}
-            className="h-8"
+            className="h-9"
             onClick={() => {
               if (typeof key === 'number') {
                 handleNumberClick(key.toString());
@@ -112,12 +116,22 @@ export function NumericKeypad({ onPLUSubmit, onSettingsClick }: NumericKeypadPro
             {key}
           </Button>
         ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-1 mt-1">
         <Button 
-          className="col-span-4 h-8" 
+          className="h-9" 
           variant="default"
           onClick={handleEnter}
         >
           Enter
+        </Button>
+        <Button 
+          className="h-9" 
+          variant="secondary"
+          onClick={handleAddAmount}
+        >
+          Add Amount
         </Button>
       </div>
     </div>
