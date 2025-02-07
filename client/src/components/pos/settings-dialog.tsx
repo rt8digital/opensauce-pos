@@ -32,6 +32,12 @@ interface SettingsDialogProps {
   onCurrencyChange: (currency: string) => void;
 }
 
+interface SettingsFormValues {
+  currency: string;
+  printerName: string;
+  scannerDeviceId: string;
+}
+
 const currencies = [
   { label: 'US Dollar', value: '$' },
   { label: 'Euro', value: '€' },
@@ -45,15 +51,15 @@ export function SettingsDialog({
   currency,
   onCurrencyChange 
 }: SettingsDialogProps) {
-  const form = useForm({
+  const form = useForm<SettingsFormValues>({
     defaultValues: {
       currency,
       printerName: '',
-      scannerEnabled: false,
+      scannerDeviceId: '',
     },
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: SettingsFormValues) => {
     onCurrencyChange(data.currency);
     onOpenChange(false);
   };
@@ -118,7 +124,7 @@ export function SettingsDialog({
 
             <FormField
               control={form.control}
-              name="scannerEnabled"
+              name="scannerDeviceId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
@@ -126,7 +132,7 @@ export function SettingsDialog({
                     Barcode Scanner
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="text" placeholder="Scanner device ID" />
+                    <Input {...field} placeholder="Scanner device ID" />
                   </FormControl>
                   <FormDescription>
                     Enter your scanner's device ID for auto-detection
