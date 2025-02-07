@@ -13,10 +13,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { insertProductSchema } from '@shared/schema';
 import type { Product } from '@shared/schema';
+import { Trash2 } from 'lucide-react';
 
 interface ProductFormProps {
   product?: Product | null;
   onSubmit: (data: Omit<Product, 'id'>) => void;
+  onDelete?: () => void;
 }
 
 const sampleImages = [
@@ -32,7 +34,7 @@ const sampleImages = [
   'https://images.unsplash.com/photo-1532667449560-72a95c8d381b',
 ];
 
-export function ProductForm({ product, onSubmit }: ProductFormProps) {
+export function ProductForm({ product, onSubmit, onDelete }: ProductFormProps) {
   const form = useForm({
     resolver: zodResolver(insertProductSchema),
     defaultValues: product || {
@@ -127,9 +129,21 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
           )}
         />
 
-        <Button type="submit" className="w-full">
-          {product ? 'Update Product' : 'Add Product'}
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" className="flex-1">
+            {product ? 'Update Product' : 'Add Product'}
+          </Button>
+          {product && onDelete && (
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={onDelete}
+              className="w-24"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </form>
     </Form>
   );

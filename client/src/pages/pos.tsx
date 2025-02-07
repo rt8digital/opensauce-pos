@@ -128,13 +128,20 @@ export default function POS() {
           if (response.ok) {
             const product = await response.json();
             handleAddToCart(product);
-            scanner.stop();
-            setScanning(false);
+            toast({
+              title: "Product Added",
+              description: `${product.name} has been added to the cart.`
+            });
           }
         });
         setScanning(true);
       } catch (error) {
         console.error('Failed to start scanner:', error);
+        toast({
+          title: "Scanner Error",
+          description: "Failed to start the barcode scanner.",
+          variant: "destructive"
+        });
       }
     }
   };

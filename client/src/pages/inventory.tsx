@@ -15,6 +15,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ProductForm } from '@/components/inventory/product-form';
 import { Plus, Edit2, AlertCircle } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -24,9 +34,10 @@ import type { Product } from '@shared/schema';
 export default function Inventory() {
   const [editProduct, setEditProduct] = React.useState<Product | null>(null);
   const [showForm, setShowForm] = React.useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const { toast } = useToast();
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products'],
   });
 
@@ -60,6 +71,27 @@ export default function Inventory() {
       setShowForm(false);
     },
   });
+
+  const deleteProductMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest('DELETE', `/api/products/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      toast({
+        title: 'Product deleted',
+        description: 'The product has been deleted successfully.',
+      });
+      setShowDeleteDialog(false);
+      setEditProduct(null);
+    },
+  });
+
+  const handleDelete = () => {
+    if (editProduct) {
+      deleteProductMutation.mutate(editProduct.id);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -116,6 +148,17 @@ export default function Inventory() {
                 >
                   <Edit2 className="h-4 w-4" />
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setEditProduct(product);
+                    setShowDeleteDialog(true);
+                  }}
+                >
+                  {/* Add a delete icon here if desired */}
+                  Delete
+                </Button>
               </TableCell>
             </TableRow>
           ))}
@@ -138,9 +181,33 @@ export default function Inventory() {
                 createProductMutation.mutate(data);
               }
             }}
+            onDelete={() => {
+              setShowDeleteDialog(true);
+            }}
           />
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the product
+              from the database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
