@@ -23,7 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
-import { Printer, ScanLine, Coins } from 'lucide-react';
+import { Printer, ScanLine, Coins, QrCode } from 'lucide-react';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -34,8 +34,10 @@ interface SettingsDialogProps {
 
 interface SettingsFormValues {
   currency: string;
+  customCurrency: string;
   printerName: string;
   scannerDeviceId: string;
+  qrCodeImage: string;
 }
 
 const currencies = [
@@ -43,6 +45,7 @@ const currencies = [
   { label: 'Euro', value: '€' },
   { label: 'British Pound', value: '£' },
   { label: 'Japanese Yen', value: '¥' },
+  { label: 'Custom', value: 'custom' },
 ] as const;
 
 export function SettingsDialog({ 
@@ -54,15 +57,33 @@ export function SettingsDialog({
   const form = useForm<SettingsFormValues>({
     defaultValues: {
       currency,
+      customCurrency: '',
       printerName: '',
       scannerDeviceId: '',
+      qrCodeImage: '',
     },
   });
 
   const onSubmit = (data: SettingsFormValues) => {
-    onCurrencyChange(data.currency);
+    const finalCurrency = data.currency === 'custom' ? data.customCurrency : data.currency;
+    onCurrencyChange(finalCurrency);
     onOpenChange(false);
   };
+
+  const handleQRImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          form.setValue('qrCodeImage', e.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const selectedCurrency = form.watch('currency');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -94,7 +115,7 @@ export function SettingsDialog({
                     <SelectContent>
                       {currencies.map((currency) => (
                         <SelectItem key={currency.value} value={currency.value}>
-                          {currency.label} ({currency.value})
+                          {currency.label} {currency.value !== 'custom' && `(${currency.value})`}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -102,6 +123,21 @@ export function SettingsDialog({
                 </FormItem>
               )}
             />
+
+            {selectedCurrency === 'custom' && (
+              <FormField
+                control={form.control}
+                name="customCurrency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Custom Currency Symbol</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter currency symbol (e.g., ₹)" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -136,6 +172,41 @@ export function SettingsDialog({
                   </FormControl>
                   <FormDescription>
                     Enter your scanner's device ID for auto-detection
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="qrCodeImage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <QrCode className="h-4 w-4" />
+                    Payment QR Code
+                  </FormLabel>
+                  <FormControl>
+                    <div className="space-y-2">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleQRImageChange}
+                        className="cursor-pointer"
+                      />
+                      {field.value && (
+                        <div className="mt-2">
+                          <img
+                            src={field.value}
+                            alt="Payment QR Code"
+                            className="max-w-[200px] mx-auto"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Upload your payment QR code image
                   </FormDescription>
                 </FormItem>
               )}

@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { apiRequest } from '@/lib/queryClient';
 import { scanner } from '@/lib/scanner';
 import { Button } from '@/components/ui/button';
-import { Plus, Database } from 'lucide-react';
+import { Plus, Database, Settings } from 'lucide-react';
 import type { Product, Order } from '@shared/schema';
 import { indexedDB } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
@@ -143,6 +143,10 @@ export default function POS() {
             <Database className="mr-2 h-4 w-4" />
             View All Items
           </Button>
+          <Button onClick={() => setShowSettings(true)} variant="outline">
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </Button>
         </div>
 
         <div className="flex-1 overflow-auto">
@@ -164,7 +168,6 @@ export default function POS() {
         <div className="border-t">
           <NumericKeypad
             onPLUSubmit={handlePLUSubmit}
-            onSettingsClick={handleSettingsClick}
             onAddAmount={handleAddAmount}
           />
         </div>

@@ -1,15 +1,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Settings } from 'lucide-react';
 
 interface NumericKeypadProps {
   onPLUSubmit: (plu: string) => void;
-  onSettingsClick: () => void;
   onAddAmount: (amount: string) => void;
 }
 
-export function NumericKeypad({ onPLUSubmit, onSettingsClick, onAddAmount }: NumericKeypadProps) {
+export function NumericKeypad({ onPLUSubmit, onAddAmount }: NumericKeypadProps) {
   const [display, setDisplay] = React.useState('');
   const [operator, setOperator] = React.useState<string | null>(null);
   const [firstNumber, setFirstNumber] = React.useState<number | null>(null);
@@ -90,9 +88,6 @@ export function NumericKeypad({ onPLUSubmit, onSettingsClick, onAddAmount }: Num
           className="text-lg font-mono h-8"
           placeholder="Enter PLU or calculate"
         />
-        <Button variant="outline" size="icon" className="h-8 w-8" onClick={onSettingsClick}>
-          <Settings className="h-4 w-4" />
-        </Button>
       </div>
 
       <div className="flex-1 grid grid-cols-4 gap-1">
