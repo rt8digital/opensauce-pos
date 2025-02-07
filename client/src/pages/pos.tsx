@@ -4,12 +4,14 @@ import { ProductGrid } from '@/components/pos/product-grid';
 import { Cart } from '@/components/pos/cart';
 import { PaymentDialog } from '@/components/pos/payment-dialog';
 import { ReceiptDialog } from '@/components/pos/receipt';
+import { NumericKeypad } from '@/components/pos/numeric-keypad';
 import { apiRequest } from '@/lib/queryClient';
 import { scanner } from '@/lib/scanner';
 import { Button } from '@/components/ui/button';
 import { Scan } from 'lucide-react';
 import type { Product, Order } from '@shared/schema';
 import { indexedDB } from '@/lib/db';
+import { useToast } from '@/hooks/use-toast';
 
 interface CartItem {
   product: Product;
@@ -23,6 +25,7 @@ export default function POS() {
   const [currentOrder, setCurrentOrder] = React.useState<Order | null>(null);
   const [scanning, setScanning] = React.useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const { toast } = useToast();
 
   const { data: products = [] } = useQuery({
     queryKey: ['/api/products'],
@@ -88,6 +91,31 @@ export default function POS() {
     createOrderMutation.mutate(method);
   };
 
+  const handlePLUSubmit = async (plu: string) => {
+    const product = products.find(p => p.barcode === plu);
+    if (product) {
+      handleAddToCart(product);
+      toast({
+        title: "Product Added",
+        description: `${product.name} has been added to the cart.`
+      });
+    } else {
+      toast({
+        title: "Product Not Found",
+        description: "No product found with this PLU/barcode.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSettingsClick = () => {
+    // TODO: Implement settings dialog
+    toast({
+      title: "Settings",
+      description: "Settings functionality coming soon!"
+    });
+  };
+
   const toggleScanner = async () => {
     if (scanning) {
       scanner.stop();
@@ -118,7 +146,7 @@ export default function POS() {
             <Scan className="mr-2 h-4 w-4" />
             {scanning ? 'Stop Scanner' : 'Start Scanner'}
           </Button>
-          
+
           {scanning && (
             <video
               ref={videoRef}
@@ -128,20 +156,28 @@ export default function POS() {
             />
           )}
         </div>
-        
+
         <ProductGrid
           products={products}
           onAddToCart={handleAddToCart}
         />
       </div>
-      
-      <div className="w-96 border-l">
-        <Cart
-          items={cart}
-          onUpdateQuantity={handleUpdateQuantity}
-          onRemoveItem={handleRemoveItem}
-          onCheckout={() => setShowPayment(true)}
-        />
+
+      <div className="w-[400px] border-l flex flex-col">
+        <div className="p-4 border-b">
+          <NumericKeypad
+            onPLUSubmit={handlePLUSubmit}
+            onSettingsClick={handleSettingsClick}
+          />
+        </div>
+        <div className="flex-1">
+          <Cart
+            items={cart}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemoveItem={handleRemoveItem}
+            onCheckout={() => setShowPayment(true)}
+          />
+        </div>
       </div>
 
       <PaymentDialog
