@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { ProductGrid } from '@/components/pos/product-grid';
 import { Cart } from '@/components/pos/cart';
 import { PaymentDialog } from '@/components/pos/payment-dialog';
@@ -8,7 +9,7 @@ import { NumericKeypad } from '@/components/pos/numeric-keypad';
 import { apiRequest } from '@/lib/queryClient';
 import { scanner } from '@/lib/scanner';
 import { Button } from '@/components/ui/button';
-import { Scan } from 'lucide-react';
+import { Plus, Scan, Database } from 'lucide-react';
 import type { Product, Order } from '@shared/schema';
 import { indexedDB } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +20,7 @@ interface CartItem {
 }
 
 export default function POS() {
+  const [, navigate] = useLocation();
   const [cart, setCart] = React.useState<CartItem[]>([]);
   const [showPayment, setShowPayment] = React.useState(false);
   const [showReceipt, setShowReceipt] = React.useState(false);
@@ -109,7 +111,6 @@ export default function POS() {
   };
 
   const handleSettingsClick = () => {
-    // TODO: Implement settings dialog
     toast({
       title: "Settings",
       description: "Settings functionality coming soon!"
@@ -140,42 +141,52 @@ export default function POS() {
 
   return (
     <div className="flex h-screen">
-      <div className="flex-1 p-4 overflow-auto">
-        <div className="mb-4">
-          <Button onClick={toggleScanner}>
+      <div className="flex-1 p-4 flex flex-col">
+        <div className="flex gap-4 mb-4">
+          <Button onClick={() => navigate('/inventory')} variant="outline">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Item
+          </Button>
+          <Button onClick={() => navigate('/inventory')} variant="outline">
+            <Database className="mr-2 h-4 w-4" />
+            View All Items
+          </Button>
+          <Button onClick={toggleScanner} variant="outline">
             <Scan className="mr-2 h-4 w-4" />
             {scanning ? 'Stop Scanner' : 'Start Scanner'}
           </Button>
-
-          {scanning && (
-            <video
-              ref={videoRef}
-              className="mt-4 w-full max-w-md"
-              autoPlay
-              playsInline
-            />
-          )}
         </div>
 
-        <ProductGrid
-          products={products}
-          onAddToCart={handleAddToCart}
-        />
+        {scanning && (
+          <video
+            ref={videoRef}
+            className="mb-4 w-full max-w-md"
+            autoPlay
+            playsInline
+          />
+        )}
+
+        <div className="flex-1 overflow-auto">
+          <ProductGrid
+            products={products}
+            onAddToCart={handleAddToCart}
+          />
+        </div>
       </div>
 
       <div className="w-[400px] border-l flex flex-col">
-        <div className="p-4 border-b">
-          <NumericKeypad
-            onPLUSubmit={handlePLUSubmit}
-            onSettingsClick={handleSettingsClick}
-          />
-        </div>
         <div className="flex-1">
           <Cart
             items={cart}
             onUpdateQuantity={handleUpdateQuantity}
             onRemoveItem={handleRemoveItem}
             onCheckout={() => setShowPayment(true)}
+          />
+        </div>
+        <div className="p-4 border-t">
+          <NumericKeypad
+            onPLUSubmit={handlePLUSubmit}
+            onSettingsClick={handleSettingsClick}
           />
         </div>
       </div>
