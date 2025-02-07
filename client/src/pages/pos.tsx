@@ -15,6 +15,7 @@ import { Plus, Database } from 'lucide-react';
 import type { Product, Order } from '@shared/schema';
 import { indexedDB } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
+import { SettingsDialog } from '@/components/pos/settings-dialog';
 
 interface CartItem {
   product: Product | { id: number; name: string; price: string };
@@ -29,6 +30,7 @@ export default function POS() {
   const [showAddItem, setShowAddItem] = React.useState(false);
   const [currentOrder, setCurrentOrder] = React.useState<Order | null>(null);
   const [currency, setCurrency] = React.useState('$');
+  const [showSettings, setShowSettings] = React.useState(false);
   const { toast } = useToast();
 
   const { data: products = [] } = useQuery<Product[]>({
@@ -126,11 +128,7 @@ export default function POS() {
   };
 
   const handleSettingsClick = () => {
-    // TODO: Implement settings dialog with currency, scanner and printer configuration
-    toast({
-      title: "Settings",
-      description: "Settings functionality coming soon!"
-    });
+    setShowSettings(true);
   };
 
   return (
@@ -198,6 +196,13 @@ export default function POS() {
           />
         </DialogContent>
       </Dialog>
+
+      <SettingsDialog
+        open={showSettings}
+        onOpenChange={setShowSettings}
+        currency={currency}
+        onCurrencyChange={setCurrency}
+      />
 
       <PaymentDialog
         open={showPayment}
