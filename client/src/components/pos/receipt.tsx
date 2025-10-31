@@ -14,9 +14,10 @@ interface ReceiptDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   order: Order;
+  currency?: string;
 }
 
-export function ReceiptDialog({ open, onOpenChange, order }: ReceiptDialogProps) {
+export function ReceiptDialog({ open, onOpenChange, order, currency = '$' }: ReceiptDialogProps) {
   const handlePrint = async () => {
     await ReceiptPrinter.print(order);
   };
@@ -38,13 +39,16 @@ export function ReceiptDialog({ open, onOpenChange, order }: ReceiptDialogProps)
           
           <div className="space-y-2">
             {order.items.map((item, index) => (
-              <div key={index} className="flex justify-between text-sm">
-                <span>
-                  {item.quantity}x ${Number(item.price).toFixed(2)}
-                </span>
-                <span>
-                  ${(Number(item.price) * item.quantity).toFixed(2)}
-                </span>
+              <div key={index} className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="font-medium">{item.productName}</span>
+                  <span>
+                    {currency}{(Number(item.price) * item.quantity).toFixed(2)}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {item.quantity}x {currency}{Number(item.price).toFixed(2)}
+                </div>
               </div>
             ))}
           </div>
@@ -52,7 +56,7 @@ export function ReceiptDialog({ open, onOpenChange, order }: ReceiptDialogProps)
           <div className="border-t pt-4">
             <div className="flex justify-between font-bold">
               <span>Total</span>
-              <span>${Number(order.total).toFixed(2)}</span>
+              <span>{currency}{Number(order.total).toFixed(2)}</span>
             </div>
             <div className="text-sm text-muted-foreground mt-2">
               Paid via {order.paymentMethod}

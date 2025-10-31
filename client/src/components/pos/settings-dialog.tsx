@@ -64,9 +64,21 @@ export function SettingsDialog({
     },
   });
 
+  React.useEffect(() => {
+    const savedQRImage = localStorage.getItem('qrCodeImage');
+    if (savedQRImage) {
+      form.setValue('qrCodeImage', savedQRImage);
+    }
+  }, [form]);
+
   const onSubmit = (data: SettingsFormValues) => {
     const finalCurrency = data.currency === 'custom' ? data.customCurrency : data.currency;
     onCurrencyChange(finalCurrency);
+    
+    if (data.qrCodeImage) {
+      localStorage.setItem('qrCodeImage', data.qrCodeImage);
+    }
+    
     onOpenChange(false);
   };
 

@@ -43,6 +43,7 @@ export function ProductForm({ product, onSubmit, onDelete }: ProductFormProps) {
       image: sampleImages[Math.floor(Math.random() * sampleImages.length)],
       stockQuantity: 0,
       barcode: '',
+      category: 'General',
     },
   });
 
@@ -123,6 +124,20 @@ export function ProductForm({ product, onSubmit, onDelete }: ProductFormProps) {
               <FormLabel>Image URL</FormLabel>
               <FormControl>
                 <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="General" />
               </FormControl>
               <FormMessage />
             </FormItem>

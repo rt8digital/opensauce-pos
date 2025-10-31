@@ -15,12 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { MainLayout } from '@/components/layout/main-layout';
 import { SalesChart } from '@/components/analytics/sales-chart';
 import { AlertCircle, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
 import type { Order } from '@shared/schema';
 
 export default function Sales() {
-  const { data: orders = [], isLoading } = useQuery({
+  const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
   });
 
@@ -30,15 +31,18 @@ export default function Sales() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <AlertCircle className="mr-2 h-6 w-6 animate-spin" />
-        Loading...
-      </div>
+      <MainLayout>
+        <div className="flex items-center justify-center h-screen">
+          <AlertCircle className="mr-2 h-6 w-6 animate-spin" />
+          Loading...
+        </div>
+      </MainLayout>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <MainLayout>
+      <div className="container mx-auto py-8">
       <h1 className="text-2xl font-bold mb-6">Sales Analytics</h1>
 
       <div className="grid gap-4 md:grid-cols-3 mb-6">
@@ -118,6 +122,7 @@ export default function Sales() {
           </Table>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

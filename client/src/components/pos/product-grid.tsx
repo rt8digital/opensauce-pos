@@ -23,7 +23,12 @@ export function ProductGrid({ products, onAddToCart }: ProductGridProps) {
           </div>
           
           <CardContent className="p-4">
-            <h3 className="font-semibold truncate">{product.name}</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold truncate flex-1">{product.name}</h3>
+              <span className="text-xs bg-secondary px-2 py-1 rounded ml-2">
+                {product.category}
+              </span>
+            </div>
             <p className="text-lg font-bold text-primary">
               ${Number(product.price).toFixed(2)}
             </p>
@@ -35,6 +40,7 @@ export function ProductGrid({ products, onAddToCart }: ProductGridProps) {
           <CardFooter className="p-4 pt-0">
             <Button
               className="w-full"
+              data-testid={`button-add-to-cart-${product.id}`}
               onClick={() => onAddToCart(product)}
               disabled={product.stockQuantity === 0}
             >

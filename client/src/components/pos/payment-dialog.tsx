@@ -27,6 +27,12 @@ export function PaymentDialog({
 }: PaymentDialogProps) {
   const [method, setMethod] = React.useState('card');
   const [qrStatus, setQrStatus] = React.useState<'waiting' | 'received' | null>(null);
+  const [savedQRImage, setSavedQRImage] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const qrImage = localStorage.getItem('qrCodeImage');
+    setSavedQRImage(qrImage);
+  }, [open]);
 
   const handlePayment = () => {
     if (method === 'qr' && qrStatus !== 'received') {
@@ -65,9 +71,10 @@ export function PaymentDialog({
             value={method}
             onValueChange={setMethod}
             className="grid gap-4"
+            data-testid="payment-method-group"
           >
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="card" id="card" />
+              <RadioGroupItem value="card" id="card" data-testid="radio-card" />
               <Label htmlFor="card" className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4" />
                 Credit Card
@@ -75,7 +82,7 @@ export function PaymentDialog({
             </div>
 
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="cash" id="cash" />
+              <RadioGroupItem value="cash" id="cash" data-testid="radio-cash" />
               <Label htmlFor="cash" className="flex items-center gap-2">
                 <Banknote className="h-4 w-4" />
                 Cash
@@ -83,7 +90,7 @@ export function PaymentDialog({
             </div>
 
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="qr" id="qr" />
+              <RadioGroupItem value="qr" id="qr" data-testid="radio-qr" />
               <Label htmlFor="qr" className="flex items-center gap-2">
                 <QrCode className="h-4 w-4" />
                 QR Payment
@@ -94,7 +101,11 @@ export function PaymentDialog({
           {method === 'qr' && qrStatus === 'waiting' && (
             <div className="mt-4 text-center">
               <div className="bg-muted p-4 rounded-lg mb-4">
-                <QrCode className="h-32 w-32 mx-auto mb-2" />
+                {savedQRImage ? (
+                  <img src={savedQRImage} alt="Payment QR Code" className="h-48 w-48 mx-auto mb-2" />
+                ) : (
+                  <QrCode className="h-32 w-32 mx-auto mb-2" />
+                )}
                 <p className="text-sm text-muted-foreground">
                   Scan QR code to make payment
                 </p>
@@ -103,12 +114,14 @@ export function PaymentDialog({
                 <Button 
                   variant="outline" 
                   className="flex-1"
+                  data-testid="button-cancel-qr"
                   onClick={() => setQrStatus(null)}
                 >
                   Cancel
                 </Button>
                 <Button 
                   className="flex-1"
+                  data-testid="button-payment-received"
                   onClick={handleQRPaymentReceived}
                 >
                   Payment Received
@@ -120,10 +133,10 @@ export function PaymentDialog({
 
         {(!method || method !== 'qr' || qrStatus === 'received') && (
           <div className="flex justify-end gap-4">
-            <Button variant="outline" onClick={handleCancel}>
+            <Button variant="outline" data-testid="button-cancel-payment" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button onClick={handlePayment}>
+            <Button data-testid="button-process-payment" onClick={handlePayment}>
               {method === 'qr' ? 'Complete Payment' : 'Process Payment'}
             </Button>
           </div>

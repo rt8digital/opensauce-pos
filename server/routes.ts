@@ -44,6 +44,15 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.delete("/api/products/:id", async (req, res) => {
+    try {
+      await storage.deleteProduct(Number(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(404).json({ message: "Product not found" });
+    }
+  });
+
   // Orders
   app.get("/api/orders", async (req, res) => {
     const orders = await storage.getOrders();

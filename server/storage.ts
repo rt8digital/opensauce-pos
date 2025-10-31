@@ -7,6 +7,7 @@ export interface IStorage {
   getProductByBarcode(barcode: string): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, product: Partial<Product>): Promise<Product>;
+  deleteProduct(id: number): Promise<void>;
   
   // Orders
   getOrders(): Promise<Order[]>;
@@ -27,10 +28,10 @@ export class MemStorage implements IStorage {
     
     // Add sample products
     const sampleProducts = [
-      { name: "Smart Watch", price: "199.99", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30", stockQuantity: 50, barcode: "123456789" },
-      { name: "Headphones", price: "89.99", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", stockQuantity: 30, barcode: "987654321" },
-      { name: "Sunglasses", price: "129.99", image: "https://images.unsplash.com/photo-1596460107916-430662021049", stockQuantity: 25, barcode: "456789123" },
-      { name: "Coffee Maker", price: "299.99", image: "https://images.unsplash.com/photo-1615615228002-890bb61cac6e", stockQuantity: 15, barcode: "789123456" }
+      { name: "Smart Watch", price: "199.99", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30", stockQuantity: 50, barcode: "123456789", category: "Electronics" },
+      { name: "Headphones", price: "89.99", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", stockQuantity: 30, barcode: "987654321", category: "Electronics" },
+      { name: "Sunglasses", price: "129.99", image: "https://images.unsplash.com/photo-1596460107916-430662021049", stockQuantity: 25, barcode: "456789123", category: "Accessories" },
+      { name: "Coffee Maker", price: "299.99", image: "https://images.unsplash.com/photo-1615615228002-890bb61cac6e", stockQuantity: 15, barcode: "789123456", category: "Appliances" }
     ];
     
     sampleProducts.forEach(product => this.createProduct(product));
@@ -50,7 +51,7 @@ export class MemStorage implements IStorage {
 
   async createProduct(product: InsertProduct): Promise<Product> {
     const id = this.currentProductId++;
-    const newProduct = { ...product, id };
+    const newProduct: Product = { ...product, id, category: product.category || "General" };
     this.products.set(id, newProduct);
     return newProduct;
   }
@@ -65,13 +66,26 @@ export class MemStorage implements IStorage {
     return updatedProduct;
   }
 
+  async deleteProduct(id: number): Promise<void> {
+    const product = await this.getProduct(id);
+    if (!product) {
+      throw new Error("Product not found");
+    }
+    this.products.delete(id);
+  }
+
   async getOrders(): Promise<Order[]> {
     return Array.from(this.orders.values());
   }
 
   async createOrder(order: InsertOrder): Promise<Order> {
     const id = this.currentOrderId++;
-    const newOrder = { ...order, id };
+    const newOrder: Order = { 
+      ...order, 
+      id, 
+      createdAt: new Date(),
+      items: order.items as any
+    };
     this.orders.set(id, newOrder);
     return newOrder;
   }

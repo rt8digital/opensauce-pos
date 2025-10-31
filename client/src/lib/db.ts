@@ -32,6 +32,9 @@ class IndexedDBStorage {
   async syncProducts(products: Product[]) {
     const db = await this.db;
     const tx = db.transaction('products', 'readwrite');
+    
+    await tx.store.clear();
+    
     await Promise.all([
       ...products.map(product => tx.store.put(product)),
       tx.done

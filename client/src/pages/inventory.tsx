@@ -9,6 +9,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Dialog,
   DialogContent,
@@ -26,10 +28,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProductForm } from '@/components/inventory/product-form';
-import { Plus, Edit2, AlertCircle } from 'lucide-react';
+import { MainLayout } from '@/components/layout/main-layout';
+import { Plus, Edit2, AlertCircle, Trash2, AlertTriangle } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@shared/schema';
+
+const LOW_STOCK_THRESHOLD = 10;
 
 export default function Inventory() {
   const [editProduct, setEditProduct] = React.useState<Product | null>(null);
@@ -40,6 +45,14 @@ export default function Inventory() {
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products'],
   });
+
+  const lowStockProducts = React.useMemo(() => {
+    return products.filter(p => p.stockQuantity <= LOW_STOCK_THRESHOLD && p.stockQuantity > 0);
+  }, [products]);
+
+  const outOfStockProducts = React.useMemo(() => {
+    return products.filter(p => p.stockQuantity === 0);
+  }, [products]);
 
   const updateProductMutation = useMutation({
     mutationFn: async (data: Partial<Product>) => {
@@ -95,28 +108,56 @@ export default function Inventory() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <AlertCircle className="mr-2 h-6 w-6 animate-spin" />
-        Loading...
-      </div>
+      <MainLayout>
+        <div className="flex items-center justify-center h-screen">
+          <AlertCircle className="mr-2 h-6 w-6 animate-spin" />
+          Loading...
+        </div>
+      </MainLayout>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Inventory Management</h1>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Product
-        </Button>
-      </div>
+    <MainLayout>
+      <div className="container mx-auto py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Inventory Management</h1>
+          <Button onClick={() => setShowForm(true)} data-testid="button-add-product">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Product
+          </Button>
+        </div>
+
+        {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
+          <div className="mb-6 space-y-4">
+            {outOfStockProducts.length > 0 && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Out of Stock Alert</AlertTitle>
+                <AlertDescription>
+                  {outOfStockProducts.length} product{outOfStockProducts.length > 1 ? 's are' : ' is'} out of stock: {' '}
+                  {outOfStockProducts.map(p => p.name).join(', ')}
+                </AlertDescription>
+              </Alert>
+            )}
+            {lowStockProducts.length > 0 && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Low Stock Alert</AlertTitle>
+                <AlertDescription>
+                  {lowStockProducts.length} product{lowStockProducts.length > 1 ? 's have' : ' has'} low stock ({LOW_STOCK_THRESHOLD} or fewer items).
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        )}
 
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Image</TableHead>
             <TableHead>Name</TableHead>
+            <TableHead>Category</TableHead>
             <TableHead>Price</TableHead>
             <TableHead>Stock</TableHead>
             <TableHead>Barcode</TableHead>
@@ -125,7 +166,7 @@ export default function Inventory() {
         </TableHeader>
         <TableBody>
           {products.map((product) => (
-            <TableRow key={product.id}>
+            <TableRow key={product.id} data-testid={`row-product-${product.id}`}>
               <TableCell>
                 <img
                   src={product.image}
@@ -133,37 +174,54 @@ export default function Inventory() {
                   className="w-12 h-12 object-cover rounded"
                 />
               </TableCell>
-              <TableCell>{product.name}</TableCell>
+              <TableCell className="font-medium">{product.name}</TableCell>
+              <TableCell>
+                <Badge variant="secondary">{product.category}</Badge>
+              </TableCell>
               <TableCell>${Number(product.price).toFixed(2)}</TableCell>
-              <TableCell>{product.stockQuantity}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <span data-testid={`text-stock-${product.id}`}>{product.stockQuantity}</span>
+                  {product.stockQuantity === 0 && (
+                    <Badge variant="destructive">Out of Stock</Badge>
+                  )}
+                  {product.stockQuantity > 0 && product.stockQuantity <= LOW_STOCK_THRESHOLD && (
+                    <Badge variant="outline" className="border-yellow-500 text-yellow-600">Low Stock</Badge>
+                  )}
+                </div>
+              </TableCell>
               <TableCell>{product.barcode}</TableCell>
               <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setEditProduct(product);
-                    setShowForm(true);
-                  }}
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setEditProduct(product);
-                    setShowDeleteDialog(true);
-                  }}
-                >
-                  {/* Add a delete icon here if desired */}
-                  Delete
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    data-testid={`button-edit-${product.id}`}
+                    onClick={() => {
+                      setEditProduct(product);
+                      setShowForm(true);
+                    }}
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    data-testid={`button-delete-${product.id}`}
+                    onClick={() => {
+                      setEditProduct(product);
+                      setShowDeleteDialog(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      </div>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent>
@@ -208,6 +266,6 @@ export default function Inventory() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </MainLayout>
   );
 }

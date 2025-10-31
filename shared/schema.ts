@@ -9,6 +9,7 @@ export const products = pgTable("products", {
   image: text("image").notNull(),
   stockQuantity: integer("stock_quantity").notNull(),
   barcode: text("barcode").notNull().unique(),
+  category: text("category").notNull().default("General"),
 });
 
 export const orderItems = pgTable("order_items", {
@@ -20,11 +21,18 @@ export const orderItems = pgTable("order_items", {
 
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
-  items: json("items").$type<typeof orderItems.$inferSelect[]>().notNull(),
+  items: json("items").$type<OrderItemWithName[]>().notNull(),
   total: numeric("total").notNull(),
   paymentMethod: text("payment_method").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export type OrderItemWithName = {
+  productId: number;
+  productName: string;
+  quantity: number;
+  price: string;
+};
 
 export const insertProductSchema = createInsertSchema(products).omit({ id: true });
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true });

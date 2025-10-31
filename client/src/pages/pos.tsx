@@ -7,11 +7,14 @@ import { PaymentDialog } from '@/components/pos/payment-dialog';
 import { ReceiptDialog } from '@/components/pos/receipt';
 import { NumericKeypad } from '@/components/pos/numeric-keypad';
 import { ProductForm } from '@/components/inventory/product-form';
+import { MainLayout } from '@/components/layout/main-layout';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { scanner } from '@/lib/scanner';
 import { Button } from '@/components/ui/button';
-import { Plus, Database, Settings } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Database, Settings, Search } from 'lucide-react';
 import type { Product, Order } from '@shared/schema';
 import { indexedDB } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
@@ -31,16 +34,39 @@ export default function POS() {
   const [currentOrder, setCurrentOrder] = React.useState<Order | null>(null);
   const [currency, setCurrency] = React.useState('$');
   const [showSettings, setShowSettings] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedCategory, setSelectedCategory] = React.useState<string>('all');
   const { toast } = useToast();
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ['/api/products'],
   });
 
+  React.useEffect(() => {
+    if (products.length > 0) {
+      indexedDB.syncProducts(products);
+    }
+  }, [products]);
+
+  const categories = React.useMemo(() => {
+    const cats = new Set(products.map(p => p.category));
+    return ['all', ...Array.from(cats)];
+  }, [products]);
+
+  const filteredProducts = React.useMemo(() => {
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           product.barcode.includes(searchTerm);
+      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, selectedCategory]);
+
   const createOrderMutation = useMutation({
     mutationFn: async (paymentMethod: string) => {
       const orderItems = cart.map(item => ({
         productId: item.product.id,
+        productName: item.product.name,
         quantity: item.quantity,
         price: item.product.price
       }));
@@ -48,6 +74,15 @@ export default function POS() {
       const total = cart.reduce((sum, item) => 
         sum + (Number(item.product.price) * item.quantity), 0
       );
+
+      for (const item of cart) {
+        if ('stockQuantity' in item.product) {
+          const product = item.product as Product;
+          await apiRequest('PATCH', `/api/products/${product.id}`, {
+            stockQuantity: product.stockQuantity - item.quantity
+          });
+        }
+      }
 
       const response = await apiRequest('POST', '/api/orders', {
         items: orderItems,
@@ -58,10 +93,22 @@ export default function POS() {
       return response.json();
     },
     onSuccess: (order) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       setCurrentOrder(order);
       setShowReceipt(true);
       setCart([]);
       indexedDB.saveOrder(order);
+      toast({
+        title: 'Order Completed',
+        description: `Order #${order.id} processed successfully.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Order Failed',
+        description: error.message || 'Failed to process the order.',
+        variant: 'destructive',
+      });
     }
   });
 
@@ -132,26 +179,53 @@ export default function POS() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <div className="flex-1 p-4 flex flex-col h-full">
+    <MainLayout>
+      <div className="flex h-screen overflow-hidden">
+        <div className="flex-1 p-4 flex flex-col h-full">
         <div className="flex gap-4 mb-4">
-          <Button onClick={() => setShowAddItem(true)} variant="outline">
+          <Button onClick={() => setShowAddItem(true)} variant="outline" data-testid="button-add-item">
             <Plus className="mr-2 h-4 w-4" />
             Add Item
           </Button>
-          <Button onClick={() => navigate('/inventory')} variant="outline">
+          <Button onClick={() => navigate('/inventory')} variant="outline" data-testid="button-inventory">
             <Database className="mr-2 h-4 w-4" />
             View All Items
           </Button>
-          <Button onClick={() => setShowSettings(true)} variant="outline">
+          <Button onClick={() => setShowSettings(true)} variant="outline" data-testid="button-settings">
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </Button>
         </div>
 
+        <div className="flex gap-4 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              data-testid="input-search"
+              type="text"
+              placeholder="Search products by name or barcode..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger data-testid="select-category" className="w-48">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map(cat => (
+                <SelectItem key={cat} value={cat}>
+                  {cat === 'all' ? 'All Categories' : cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex-1 overflow-auto">
           <ProductGrid
-            products={products}
+            products={filteredProducts}
             onAddToCart={handleAddToCart}
           />
         </div>
@@ -225,6 +299,7 @@ export default function POS() {
           currency={currency}
         />
       )}
-    </div>
+      </div>
+    </MainLayout>
   );
 }
