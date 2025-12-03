@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { storage } from "@/lib/storage";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -12,7 +13,16 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // Check if we're in client mode and need to redirect requests to server
+  const settings = await storage.getSettings();
+  let targetUrl = url;
+
+  if (settings?.deviceRole === 'client' && settings.serverIpAddress) {
+    // Redirect API requests to the server
+    targetUrl = `http://${settings.serverIpAddress}:5001${url}`;
+  }
+
+  const res = await fetch(targetUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -28,18 +38,32 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
+    async ({ queryKey }) => {
+      let targetUrl = queryKey[0] as string;
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
+      // Only check for redirection if this is not a settings request
+      // to avoid circular dependency
+      if (!targetUrl.includes('/api/settings')) {
+        // Check if we're in client mode and need to redirect requests to server
+        const settings = await storage.getSettings();
 
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+        if (settings?.deviceRole === 'client' && settings.serverIpAddress) {
+          // Redirect API requests to the server
+          targetUrl = `http://${settings.serverIpAddress}:5001${targetUrl}`;
+        }
+      }
+
+      const res = await fetch(targetUrl, {
+        credentials: "include",
+      });
+
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      await throwIfResNotOk(res);
+      return await res.json();
+    };
 
 export const queryClient = new QueryClient({
   defaultOptions: {

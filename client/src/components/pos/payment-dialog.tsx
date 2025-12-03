@@ -6,81 +6,110 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CreditCard, Banknote, QrCode } from 'lucide-react';
+import { Banknote, Receipt } from 'lucide-react';
+import { useCurrency } from '@/contexts/currency-context';
 
 interface PaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   total: number;
   onProcessPayment: (method: string) => void;
-  currency?: string;
 }
 
-export function PaymentDialog({ 
-  open, 
-  onOpenChange, 
-  total, 
-  onProcessPayment,
-  currency = '$'
+export function PaymentDialog({
+  open,
+  onOpenChange,
+  total,
+  onProcessPayment
 }: PaymentDialogProps) {
-  const [method, setMethod] = React.useState('card');
-  const [qrStatus, setQrStatus] = React.useState<'waiting' | 'received' | null>(null);
-  const [savedQRImage, setSavedQRImage] = React.useState<string | null>(null);
+  const [method, setMethod] = React.useState('cash');
+  const [cashAmount, setCashAmount] = React.useState('');
+  const [showCashInput, setShowCashInput] = React.useState(false);
+  const { formatPrice } = useCurrency();
 
-  React.useEffect(() => {
-    const qrImage = localStorage.getItem('qrCodeImage');
-    setSavedQRImage(qrImage);
-  }, [open]);
+  const cashProvided = parseFloat(cashAmount) || 0;
+  const change = Math.max(0, cashProvided - total);
 
   const handlePayment = () => {
-    if (method === 'qr' && qrStatus !== 'received') {
-      setQrStatus('waiting');
+    if (method === 'cash' && !showCashInput) {
+      setShowCashInput(true);
       return;
     }
     onProcessPayment(method);
     onOpenChange(false);
-    setQrStatus(null);
-  };
-
-  const handleQRPaymentReceived = () => {
-    setQrStatus('received');
+    setShowCashInput(false);
+    setCashAmount('');
   };
 
   const handleCancel = () => {
-    setQrStatus(null);
+    setShowCashInput(false);
+    setCashAmount('');
     onOpenChange(false);
   };
+
+  // Keyboard shortcuts for payment
+  React.useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Alt + 1/2 for payment methods
+      if (e.altKey && e.key === '1') {
+        e.preventDefault();
+        setMethod('cash');
+        setShowCashInput(false);
+        setCashAmount('');
+      } else if (e.altKey && e.key === '2') {
+        e.preventDefault();
+        setMethod('receipt_only');
+        setShowCashInput(false);
+        setCashAmount('');
+      }
+      // Enter to process payment
+      else if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        handlePayment();
+      }
+      // Escape to cancel
+      else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleCancel();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, method, showCashInput]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Payment</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Use Alt+1/2 for payment methods, Enter to process
+          </p>
         </DialogHeader>
 
         <div className="py-6">
           <div className="mb-6 text-center">
             <span className="text-3xl font-bold">
-              {currency}{total.toFixed(2)}
+              {formatPrice(total)}
             </span>
           </div>
 
           <RadioGroup
             value={method}
-            onValueChange={setMethod}
+            onValueChange={(value) => {
+              setMethod(value);
+              setShowCashInput(false);
+              setCashAmount('');
+            }}
             className="grid gap-4"
             data-testid="payment-method-group"
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="card" id="card" data-testid="radio-card" />
-              <Label htmlFor="card" className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4" />
-                Credit Card
-              </Label>
-            </div>
-
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="cash" id="cash" data-testid="radio-cash" />
               <Label htmlFor="cash" className="flex items-center gap-2">
@@ -90,57 +119,64 @@ export function PaymentDialog({
             </div>
 
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="qr" id="qr" data-testid="radio-qr" />
-              <Label htmlFor="qr" className="flex items-center gap-2">
-                <QrCode className="h-4 w-4" />
-                QR Payment
+              <RadioGroupItem value="receipt_only" id="receipt_only" data-testid="radio-receipt-only" />
+              <Label htmlFor="receipt_only" className="flex items-center gap-2">
+                <Receipt className="h-4 w-4" />
+                Receipt Only
               </Label>
             </div>
           </RadioGroup>
 
-          {method === 'qr' && qrStatus === 'waiting' && (
-            <div className="mt-4 text-center">
-              <div className="bg-muted p-4 rounded-lg mb-4">
-                {savedQRImage ? (
-                  <img src={savedQRImage} alt="Payment QR Code" className="h-48 w-48 mx-auto mb-2" />
-                ) : (
-                  <QrCode className="h-32 w-32 mx-auto mb-2" />
-                )}
-                <p className="text-sm text-muted-foreground">
-                  Scan QR code to make payment
-                </p>
+          {method === 'cash' && showCashInput && (
+            <div className="mt-4 space-y-4">
+              <div>
+                <Label htmlFor="cash-amount">Cash Amount Received</Label>
+                <Input
+                  id="cash-amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={cashAmount}
+                  onChange={(e) => setCashAmount(e.target.value)}
+                  className="mt-1"
+                  autoFocus
+                />
               </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
-                  data-testid="button-cancel-qr"
-                  onClick={() => setQrStatus(null)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  className="flex-1"
-                  data-testid="button-payment-received"
-                  onClick={handleQRPaymentReceived}
-                >
-                  Payment Received
-                </Button>
-              </div>
+
+              {cashProvided > 0 && (
+                <div className="bg-muted p-3 rounded-lg space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Total:</span>
+                    <span>{formatPrice(total)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Cash Received:</span>
+                    <span>{formatPrice(cashProvided)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg border-t pt-2">
+                    <span>Change:</span>
+                    <span className={change > 0 ? 'text-green-600' : ''}>
+                      {formatPrice(change)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {(!method || method !== 'qr' || qrStatus === 'received') && (
-          <div className="flex justify-end gap-4">
-            <Button variant="outline" data-testid="button-cancel-payment" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button data-testid="button-process-payment" onClick={handlePayment}>
-              {method === 'qr' ? 'Complete Payment' : 'Process Payment'}
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-end gap-4">
+          <Button variant="outline" data-testid="button-cancel-payment" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button
+            data-testid="button-process-payment"
+            onClick={handlePayment}
+            disabled={method === 'cash' && showCashInput && cashProvided < total}
+          >
+            {method === 'cash' && !showCashInput ? 'Enter Cash Amount' : 'Process Payment'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -1,14 +1,13 @@
 import { defineConfig } from "drizzle-kit";
+import path from "path";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL, ensure the database is provisioned");
-}
-
+const isDev = process.env.NODE_ENV !== "production";
+const dbPath = isDev ? "./sqlite.db" : path.join(require('electron').app?.getPath('userData') || '.', 'sqlite.db');
 export default defineConfig({
   out: "./migrations",
   schema: "./shared/schema.ts",
-  dialect: "postgresql",
+  dialect: "sqlite",
   dbCredentials: {
-    url: process.env.DATABASE_URL,
+    url: process.env.DATABASE_URL || "sqlite.db",
   },
 });

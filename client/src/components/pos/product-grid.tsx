@@ -1,7 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ShoppingCart } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import type { Product } from '@shared/schema';
 
 interface ProductGridProps {
@@ -11,43 +9,29 @@ interface ProductGridProps {
 
 export function ProductGrid({ products, onAddToCart }: ProductGridProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div data-testid="product-grid" className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 pb-20 md:pb-0">
       {products.map((product) => (
-        <Card key={product.id} className="overflow-hidden">
-          <div className="aspect-square overflow-hidden">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover transition-transform hover:scale-105"
-            />
-          </div>
-          
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold truncate flex-1">{product.name}</h3>
-              <span className="text-xs bg-secondary px-2 py-1 rounded ml-2">
-                {product.category}
-              </span>
+        <Card
+          key={product.id}
+          className="overflow-hidden flex flex-col cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => product.stockQuantity > 0 && onAddToCart(product)}
+        >
+          <div className="aspect-square overflow-hidden bg-muted/30 flex items-center justify-center">
+            <div className="text-6xl md:text-7xl">
+              {product.image}
             </div>
-            <p className="text-lg font-bold text-primary">
-              ${Number(product.price).toFixed(2)}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Stock: {product.stockQuantity}
-            </p>
+          </div>
+
+          <CardContent className="p-3 md:p-4 flex-grow">
+            <h3 className="font-semibold text-sm md:text-base mb-2 line-clamp-2 text-center">
+              {product.name}
+            </h3>
+            {product.plu && (
+              <p className="text-lg font-bold text-primary text-center">
+                PLU: {product.plu}
+              </p>
+            )}
           </CardContent>
-          
-          <CardFooter className="p-4 pt-0">
-            <Button
-              className="w-full"
-              data-testid={`button-add-to-cart-${product.id}`}
-              onClick={() => onAddToCart(product)}
-              disabled={product.stockQuantity === 0}
-            >
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to Cart
-            </Button>
-          </CardFooter>
         </Card>
       ))}
     </div>
