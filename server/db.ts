@@ -54,7 +54,15 @@ export async function initializeDatabase() {
                 deviceRole: 'standalone',
             });
 
-            console.log('Database initialized with default settings');
+            // Insert default admin user
+            await db.insert(schema.users).values({
+                name: 'Admin',
+                pin: '1234',
+                role: 'admin',
+                isOwner: true,
+            });
+
+            console.log('Database initialized with default data');
         }
     } catch (error) {
         console.error('Error initializing database:', error);

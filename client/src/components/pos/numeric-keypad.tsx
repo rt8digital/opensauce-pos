@@ -6,9 +6,10 @@ interface NumericKeypadProps {
   onPLUSubmit: (plu: string) => void;
   onAddAmount: (amount: string) => void;
   onDisplayChange?: (display: string) => void;
+  disableKeyboard?: boolean;
 }
 
-export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange }: NumericKeypadProps) {
+export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange, disableKeyboard = false }: NumericKeypadProps) {
   const [display, setDisplay] = React.useState('');
   const [operator, setOperator] = React.useState<string | null>(null);
   const [firstNumber, setFirstNumber] = React.useState<number | null>(null);
@@ -73,6 +74,8 @@ export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange }: Num
 
   // Handle physical keyboard input
   React.useEffect(() => {
+    if (disableKeyboard) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevent default behavior for numeric keys to avoid conflicts
       if (/[0-9]|\.|\+|\-|\*|\/|\=|Enter|Escape|Backspace/.test(e.key)) {
@@ -140,7 +143,7 @@ export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange }: Num
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [display, operator, firstNumber, newNumber, onPLUSubmit, onAddAmount, handleNumberClick, handleOperator, handleClear]);
+  }, [disableKeyboard, display, operator, firstNumber, newNumber, onPLUSubmit, onAddAmount, handleNumberClick, handleOperator, handleClear]);
 
   // Define the new 3-column layout buttons
   const buttons = [

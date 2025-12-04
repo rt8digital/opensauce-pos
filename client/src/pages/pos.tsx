@@ -22,6 +22,7 @@ import { indexedDB } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/contexts/currency-context';
 import { useAuth } from '@/contexts/auth-context';
+import { whatsappWebService } from '@/lib/whatsapp-web';
 
 
 interface CartItem {
@@ -128,12 +129,46 @@ export default function POS() {
 
       return response.json();
     },
-    onSuccess: (order) => {
+    onSuccess: async (order) => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       setCurrentOrder(order);
       setShowReceipt(true);
       setCart([]);
       indexedDB.saveOrder(order);
+
+      // Send WhatsApp invoice if customer is selected and has phone number
+      if (selectedCustomer?.phone) {
+        try {
+          const whatsappMessage = whatsappWebService.formatReceipt({
+            ...order,
+            storeName: 'OpenSauce POS', // You can make this configurable
+            items: JSON.parse(order.items)
+          });
+
+          const success = await whatsappWebService.sendMessage(selectedCustomer.phone, whatsappMessage);
+
+          if (success) {
+            toast({
+              title: 'WhatsApp Invoice Sent',
+              description: `Invoice sent to ${selectedCustomer.name} via WhatsApp.`,
+            });
+          } else {
+            toast({
+              title: 'WhatsApp Send Failed',
+              description: 'Invoice could not be sent via WhatsApp. Check customer phone number.',
+              variant: 'destructive',
+            });
+          }
+        } catch (error) {
+          console.error('WhatsApp send error:', error);
+          toast({
+            title: 'WhatsApp Error',
+            description: 'Failed to send WhatsApp invoice. Please check the phone number format.',
+            variant: 'destructive',
+          });
+        }
+      }
+
       toast({
         title: 'Order Completed',
         description: `Order #${order.id} processed successfully.`,
@@ -401,6 +436,7 @@ export default function POS() {
                 onPLUSubmit={handlePLUSubmit}
                 onAddAmount={handleAddAmount}
                 onDisplayChange={setCurrentNumpadDisplay}
+                disableKeyboard={showPayment}
               />
             </div>
           )}

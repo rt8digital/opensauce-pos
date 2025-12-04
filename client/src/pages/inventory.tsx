@@ -318,56 +318,75 @@ export default function Inventory() {
         </div>
       )}
 
-      <div className="container mx-auto py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">Inventory Management</h1>
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="container mx-auto px-4 py-6 lg:px-6 max-w-7xl">
+        {/* Header Section */}
+        <div className="flex flex-col space-y-4 lg:flex-row lg:justify-between lg:items-start lg:space-y-0 mb-6">
+          <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4 sm:items-center">
+            <div className="flex flex-col space-y-1">
+              <h1 className="text-xl font-bold sm:text-2xl lg:text-3xl">Inventory Management</h1>
+              <p className="text-sm text-muted-foreground hidden sm:block">
+                Manage your products and stock levels
+              </p>
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative w-full sm:w-64 lg:w-80">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
+                className="pl-10 pr-4"
               />
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" className="text-xs md:text-sm" onClick={() => setIsCameraScanning(true)}>
-              <Camera className="mr-1 h-3 w-3 md:mr-2 md:h-4 md:w-4" />
-              <span className="hidden xs:inline">Scan Product</span>
-              <span className="xs:hidden">Scan</span>
-            </Button>
+          {/* Action Buttons */}
+          <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-2 sm:flex-wrap">
+            {/* Primary Actions */}
+            <div className="flex space-x-2">
+              <Button size="sm" onClick={() => setShowForm(true)} data-testid="button-add-product" className="flex-1 sm:flex-none">
+                <Plus className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Add Product</span>
+                <span className="sm:hidden">Add</span>
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={() => setIsCameraScanning(true)} className="flex-1 sm:flex-none">
+                <Camera className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Scan Product</span>
+                <span className="sm:hidden">Scan</span>
+              </Button>
+            </div>
+
+            {/* Secondary Actions */}
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex-1 sm:flex-none">
+                <Download className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Export CSV</span>
+                <span className="sm:hidden">Export</span>
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="flex-1 sm:flex-none">
+                <Download className="mr-2 h-4 w-4 rotate-180" />
+                <span className="hidden sm:inline">Import CSV</span>
+                <span className="sm:hidden">Import</span>
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept=".csv"
+                onChange={handleImportCSV}
+                aria-label="Import products from CSV file"
+              />
+            </div>
+
+            {/* Bulk Actions */}
             {selectedProducts.length > 0 && (
-              <Button variant="destructive" size="sm" className="text-xs md:text-sm">
-                <Trash2 className="mr-1 h-3 w-3 md:mr-2 md:h-4 md:w-4" />
-                <span className="hidden xs:inline">Delete Selected ({selectedProducts.length})</span>
-                <span className="xs:hidden">{selectedProducts.length}</span>
+              <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="w-full sm:w-auto">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Selected ({selectedProducts.length})
               </Button>
             )}
-            <Button variant="outline" size="sm" className="text-xs md:text-sm" onClick={handleExportCSV}>
-              <Download className="mr-1 h-3 w-3 md:mr-2 md:h-4 md:w-4" />
-              <span className="hidden xs:inline">Export CSV</span>
-              <span className="xs:hidden">CSV</span>
-            </Button>
-            <Button variant="outline" size="sm" className="text-xs md:text-sm" onClick={() => fileInputRef.current?.click()}>
-              <Download className="mr-1 h-3 w-3 md:mr-2 md:h-4 md:w-4 rotate-180" />
-              <span className="hidden xs:inline">Import CSV</span>
-              <span className="xs:hidden">Import</span>
-            </Button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept=".csv"
-              onChange={handleImportCSV}
-              aria-label="Import products from CSV file"
-            />
-            <Button size="sm" className="text-xs md:text-sm" onClick={() => setShowForm(true)} data-testid="button-add-product">
-              <Plus className="mr-1 h-3 w-3 md:mr-2 md:h-4 md:w-4" />
-              <span className="hidden xs:inline">Add Product</span>
-              <span className="xs:hidden">Add</span>
-            </Button>
           </div>
         </div>
 
@@ -395,114 +414,210 @@ export default function Inventory() {
           </div>
         )}
 
-        <div className="border rounded-md overflow-x-auto">
-          <Table className="min-w-[800px] md:min-w-0">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[40px] md:w-[50px]">
-                  <Checkbox
-                    checked={products.length > 0 && selectedProducts.length === products.length}
-                    onCheckedChange={toggleSelectAll}
-                  />
-                </TableHead>
-                <TableHead className="hidden md:table-cell">Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="hidden md:table-cell">Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead className="hidden md:table-cell">Barcode</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.map((product) => (
-                <TableRow key={product.id} data-testid={`row-product-${product.id}`}>
-                  <TableCell>
+        {/* Products Table */}
+        <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
+          {/* Mobile View - Card Layout */}
+          <div className="block md:hidden">
+            {filteredProducts.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground">
+                No products found
+              </div>
+            ) : (
+              <div className="divide-y">
+                {filteredProducts.map((product) => (
+                  <div key={product.id} className="p-4 space-y-3" data-testid={`row-product-${product.id}`}>
+                    {/* Product Header */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <Checkbox
+                          checked={selectedProducts.includes(product.id)}
+                          onCheckedChange={() => toggleSelectProduct(product.id)}
+                        />
+                        <div className="text-2xl">{product.image}</div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-sm truncate">{product.name}</h3>
+                          <Badge variant="secondary" className="text-xs mt-1">{product.category}</Badge>
+                        </div>
+                      </div>
+                      <div className="flex space-x-1 ml-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          data-testid={`button-edit-${product.id}`}
+                          onClick={() => {
+                            setEditProduct(product);
+                            setShowForm(true);
+                          }}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          data-testid={`button-delete-${product.id}`}
+                          onClick={() => {
+                            setEditProduct(product);
+                            setShowDeleteDialog(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Product Details */}
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Price:</span>
+                        <div className="font-medium">{formatPrice(Number(product.price))}</div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Stock:</span>
+                        <div className="flex items-center gap-2">
+                          <span data-testid={`text-stock-${product.id}`} className="font-medium">{product.stockQuantity}</span>
+                          {product.stockQuantity === 0 && (
+                            <Badge variant="destructive" className="text-xs">Out</Badge>
+                          )}
+                          {product.stockQuantity > 0 && product.stockQuantity <= LOW_STOCK_THRESHOLD && (
+                            <Badge variant="outline" className="border-yellow-500 text-yellow-600 text-xs">Low</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-muted-foreground">Barcode:</span>
+                        <div className="font-mono text-xs">{product.barcode}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop View - Table Layout */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">
                     <Checkbox
-                      checked={selectedProducts.includes(product.id)}
-                      onCheckedChange={() => toggleSelectProduct(product.id)}
+                      checked={products.length > 0 && selectedProducts.length === products.length}
+                      onCheckedChange={toggleSelectAll}
                     />
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <div className="text-3xl">
-                      {product.image}
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium max-w-[150px] md:max-w-none">
-                    <div className="truncate text-sm md:text-base">{product.name}</div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <Badge variant="secondary">{product.category}</Badge>
-                  </TableCell>
-                  <TableCell>{formatPrice(Number(product.price))}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <span data-testid={`text-stock-${product.id}`} className="text-sm">{product.stockQuantity}</span>
-                      {product.stockQuantity === 0 && (
-                        <Badge variant="destructive" className="text-xs">Out</Badge>
-                      )}
-                      {product.stockQuantity > 0 && product.stockQuantity <= LOW_STOCK_THRESHOLD && (
-                        <Badge variant="outline" className="border-yellow-500 text-yellow-600 text-xs">Low</Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">{product.barcode}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 touch-target-min"
-                        data-testid={`button-edit-${product.id}`}
-                        onClick={() => {
-                          setEditProduct(product);
-                          setShowForm(true);
-                        }}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 touch-target-min"
-                        data-testid={`button-delete-${product.id}`}
-                        onClick={() => {
-                          setEditProduct(product);
-                          setShowDeleteDialog(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                  </TableHead>
+                  <TableHead className="w-16">Image</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead className="text-right">Price</TableHead>
+                  <TableHead className="text-center">Stock</TableHead>
+                  <TableHead>Barcode</TableHead>
+                  <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredProducts.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      No products found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <TableRow key={product.id} data-testid={`row-product-${product.id}`}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedProducts.includes(product.id)}
+                          onCheckedChange={() => toggleSelectProduct(product.id)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-2xl text-center">{product.image}</div>
+                      </TableCell>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{product.category}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-medium">{formatPrice(Number(product.price))}</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <span data-testid={`text-stock-${product.id}`}>{product.stockQuantity}</span>
+                          {product.stockQuantity === 0 && (
+                            <Badge variant="destructive" className="text-xs">Out</Badge>
+                          )}
+                          {product.stockQuantity > 0 && product.stockQuantity <= LOW_STOCK_THRESHOLD && (
+                            <Badge variant="outline" className="border-yellow-500 text-yellow-600 text-xs">Low</Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">{product.barcode}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            data-testid={`button-edit-${product.id}`}
+                            onClick={() => {
+                              setEditProduct(product);
+                              setShowForm(true);
+                            }}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            data-testid={`button-delete-${product.id}`}
+                            onClick={() => {
+                              setEditProduct(product);
+                              setShowDeleteDialog(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editProduct ? 'Edit Product' : 'Add Product'}
+        <DialogContent className="max-w-full h-full max-h-full p-0 gap-0 bg-background">
+          <DialogHeader className="px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <DialogTitle className="text-xl font-semibold">
+              {editProduct ? 'Edit Product' : 'Add New Product'}
             </DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              {editProduct ? 'Update product information and settings' : 'Create a new product for your inventory'}
+            </p>
           </DialogHeader>
-          <ProductForm
-            product={editProduct}
-            categories={Array.from(new Set(products.map(p => p.category)))}
-            onSubmit={(data) => {
-              if (editProduct) {
-                updateProductMutation.mutate({ ...data, id: editProduct.id });
-              } else {
-                createProductMutation.mutate(data);
-              }
-            }}
-            onDelete={() => {
-              setShowDeleteDialog(true);
-            }}
-          />
+
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <div className="max-w-2xl mx-auto">
+              <ProductForm
+                product={editProduct}
+                categories={Array.from(new Set(products.map(p => p.category)))}
+                onSubmit={(data) => {
+                  if (editProduct) {
+                    updateProductMutation.mutate({ ...data, id: editProduct.id });
+                  } else {
+                    createProductMutation.mutate(data);
+                  }
+                }}
+                onDelete={() => {
+                  setShowDeleteDialog(true);
+                }}
+              />
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

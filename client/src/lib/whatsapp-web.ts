@@ -29,11 +29,14 @@ export class WhatsAppWebService {
      */
     async sendMessage(phoneNumber: string, message: string): Promise<boolean> {
         try {
-            // Format phone number (remove non-digits and ensure country code)
-            const cleanNumber = phoneNumber.replace(/\D/g, '');
+            // Format and validate phone number
+            const formattedNumber = this.formatPhoneNumber(phoneNumber);
+            if (!formattedNumber) {
+                throw new Error('Invalid phone number format. Please use international format with country code (e.g., +27821234567)');
+            }
 
             // Create WhatsApp Web URL
-            const whatsappWebUrl = `https://web.whatsapp.com/send?phone=${cleanNumber}&text=${encodeURIComponent(message)}`;
+            const whatsappWebUrl = `https://web.whatsapp.com/send?phone=${formattedNumber}&text=${encodeURIComponent(message)}`;
 
             if (this.isElectron()) {
                 // For Electron (desktop), try to use background browser automation
@@ -47,6 +50,38 @@ export class WhatsAppWebService {
             await this.storeOfflineMessage(phoneNumber, message);
             return false;
         }
+    }
+
+    /**
+     * Format phone number for WhatsApp Web
+     * WhatsApp Web expects international format without + sign
+     */
+    private formatPhoneNumber(phoneNumber: string): string | null {
+        // Remove all non-digits
+        let cleanNumber = phoneNumber.replace(/\D/g, '');
+
+        // Remove leading zeros
+        cleanNumber = cleanNumber.replace(/^0+/, '');
+
+        // If number starts with country code, ensure it's properly formatted
+        if (cleanNumber.length >= 10 && cleanNumber.length <= 15) {
+            // Valid length for international numbers
+            return cleanNumber;
+        }
+
+        // If number is too short, it might be missing country code
+        if (cleanNumber.length < 10) {
+            console.warn('Phone number seems too short. Please include country code.');
+            return null;
+        }
+
+        // If number is too long, it might have invalid characters
+        if (cleanNumber.length > 15) {
+            console.warn('Phone number seems too long. Please check the format.');
+            return null;
+        }
+
+        return cleanNumber;
     }
 
     /**
@@ -183,8 +218,10 @@ export class WhatsAppWebService {
     openWhatsAppWeb(phoneNumber?: string): void {
         let url = 'https://web.whatsapp.com';
         if (phoneNumber) {
-            const cleanNumber = phoneNumber.replace(/\D/g, '');
-            url = `https://web.whatsapp.com/send?phone=${cleanNumber}`;
+            const formattedNumber = this.formatPhoneNumber(phoneNumber);
+            if (formattedNumber) {
+                url = `https://web.whatsapp.com/send?phone=${formattedNumber}`;
+            }
         }
 
         window.open(url, 'whatsapp-web', 'width=1000,height=700,scrollbars=yes,resizable=yes');

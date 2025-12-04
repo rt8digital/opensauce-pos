@@ -16,7 +16,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from client/public directory
-const publicPath = path.join(__dirname, '../client/public');
+// Serve static files from client/public directory
+const isProduction = process.env.NODE_ENV === 'production';
+const publicPath = isProduction
+    ? path.join(__dirname, 'public')
+    : path.join(__dirname, '../client/public');
 app.use(express.static(publicPath));
 
 // Serve static files from client/src directory for development

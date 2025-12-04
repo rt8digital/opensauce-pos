@@ -1,0 +1,41 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#1A1A2E" opacity="0.1"/>
+  
+  <!-- Cash Register Base -->
+  <rect x="50" y="90" width="100" height="70" rx="5" fill="#1A1A2E"/>
+  <rect x="55" y="95" width="90" height="60" rx="3" fill="#2D2D44"/>
+  
+  <!-- Screen -->
+  <rect x="65" y="105" width="70" height="25" rx="2" fill="#4ECCA3"/>
+  <text x="100" y="122" font-family="monospace" font-size="12" fill="#1A1A2E" text-anchor="middle" font-weight="bold">$99.99</text>
+  
+  <!-- Buttons -->
+  <circle cx="75" cy="145" r="4" fill="#FF6B35"/>
+  <circle cx="90" cy="145" r="4" fill="#FF6B35"/>
+  <circle cx="105" cy="145" r="4" fill="#FF6B35"/>
+  <circle cx="120" cy="145" r="4" fill="#FF6B35"/>
+  
+  <!-- Receipt -->
+  <rect x="85" y="70" width="30" height="25" rx="2" fill="#FFFFFF" stroke="#1A1A2E" stroke-width="1"/>
+  <line x1="90" y1="75" x2="110" y2="75" stroke="#1A1A2E" stroke-width="1"/>
+  <line x1="90" y1="80" x2="110" y2="80" stroke="#1A1A2E" stroke-width="1"/>
+  <line x1="90" y1="85" x2="105" y2="85" stroke="#1A1A2E" stroke-width="1"/>
+  
+  <!-- Sauce Drips (OpenSauce theme) -->
+  <!-- Drip 1 -->
+  <path d="M 70 60 Q 70 65, 68 70 L 68 75 Q 68 78, 70 78 Q 72 78, 72 75 L 72 70 Q 70 65, 70 60" fill="#E63946"/>
+  <!-- Drip 2 -->
+  <path d="M 85 55 Q 85 60, 83 65 L 83 72 Q 83 75, 85 75 Q 87 75, 87 72 L 87 65 Q 85 60, 85 55" fill="#FF6B35"/>
+  <!-- Drip 3 -->
+  <path d="M 115 55 Q 115 60, 113 65 L 113 72 Q 113 75, 115 75 Q 117 75, 117 72 L 117 65 Q 115 60, 115 55" fill="#FF6B35"/>
+  <!-- Drip 4 -->
+  <path d="M 130 60 Q 130 65, 128 70 L 128 75 Q 128 78, 130 78 Q 132 78, 132 75 L 132 70 Q 130 65, 130 60" fill="#E63946"/>
+  
+  <!-- Sauce Puddle on Top -->
+  <ellipse cx="100" cy="58" rx="45" ry="8" fill="#FF6B35" opacity="0.8"/>
+  <ellipse cx="100" cy="56" rx="40" ry="6" fill="#E63946" opacity="0.9"/>
+  
+  <!-- Shine/Highlight -->
+  <ellipse cx="90" cy="55" rx="15" ry="3" fill="#FFFFFF" opacity="0.4"/>
+</svg>

@@ -136,22 +136,30 @@ export default function Discounts() {
             </div>
 
             <Dialog open={showForm} onOpenChange={setShowForm}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>
-                            {editDiscount ? 'Edit Discount' : 'Add Discount'}
+                <DialogContent className="max-w-full h-full max-h-full p-0 gap-0 bg-background">
+                    <DialogHeader className="px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                        <DialogTitle className="text-xl font-semibold">
+                            {editDiscount ? 'Edit Discount' : 'Add New Discount'}
                         </DialogTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            {editDiscount ? 'Update discount settings and conditions' : 'Create a new discount or promotion'}
+                        </p>
                     </DialogHeader>
-                    <DiscountForm
-                        discount={editDiscount}
-                        onSubmit={(data) => {
-                            if (editDiscount) {
-                                updateDiscountMutation.mutate({ ...data, id: editDiscount.id });
-                            } else {
-                                createDiscountMutation.mutate(data);
-                            }
-                        }}
-                    />
+
+                    <div className="flex-1 overflow-y-auto px-6 py-6">
+                        <div className="max-w-2xl mx-auto">
+                            <DiscountForm
+                                discount={editDiscount}
+                                onSubmit={(data) => {
+                                    if (editDiscount) {
+                                        updateDiscountMutation.mutate({ ...data, id: editDiscount.id });
+                                    } else {
+                                        createDiscountMutation.mutate(data);
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
         </MainLayout>

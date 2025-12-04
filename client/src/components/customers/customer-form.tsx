@@ -12,6 +12,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 interface CustomerFormProps {
     customer?: Customer | null;
@@ -65,9 +73,13 @@ export function CustomerForm({ customer, onSubmit, onDelete }: CustomerFormProps
                     name="phone"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Phone</FormLabel>
+                            <FormLabel>Phone (WhatsApp)</FormLabel>
                             <FormControl>
-                                <Input placeholder="Phone Number" {...field} value={field.value || ''} />
+                                <PhoneInput
+                                    placeholder="Phone number for WhatsApp"
+                                    {...field}
+                                    value={field.value || ''}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

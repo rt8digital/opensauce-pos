@@ -29,7 +29,7 @@ export function Receipt({ open, onOpenChange, order, products, customer }: Recei
 
   if (!order) return null;
 
-  const orderItems = (order.items as any[]).map((item) => {
+  const orderItems = (JSON.parse(order.items) as any[]).map((item) => {
     const product = products.find((p) => p.id === item.productId);
     return {
       ...item,
@@ -102,7 +102,7 @@ export function Receipt({ open, onOpenChange, order, products, customer }: Recei
             {showDate && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Date</span>
-                <span>{format(new Date(order.createdAt), "PPpp")}</span>
+                <span>{format(new Date(order.createdAt || new Date()), "PPpp")}</span>
               </div>
             )}
             {showCustomer && customer && (

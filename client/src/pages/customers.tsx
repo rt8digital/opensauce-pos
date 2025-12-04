@@ -153,22 +153,30 @@ export default function Customers() {
             </div>
 
             <Dialog open={showForm} onOpenChange={setShowForm}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>
-                            {editCustomer ? 'Edit Customer' : 'Add Customer'}
+                <DialogContent className="max-w-full h-full max-h-full p-0 gap-0 bg-background">
+                    <DialogHeader className="px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                        <DialogTitle className="text-xl font-semibold">
+                            {editCustomer ? 'Edit Customer' : 'Add New Customer'}
                         </DialogTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            {editCustomer ? 'Update customer information and details' : 'Create a new customer profile'}
+                        </p>
                     </DialogHeader>
-                    <CustomerForm
-                        customer={editCustomer}
-                        onSubmit={(data) => {
-                            if (editCustomer) {
-                                updateCustomerMutation.mutate({ ...data, id: editCustomer.id });
-                            } else {
-                                createCustomerMutation.mutate(data);
-                            }
-                        }}
-                    />
+
+                    <div className="flex-1 overflow-y-auto px-6 py-6">
+                        <div className="max-w-2xl mx-auto">
+                            <CustomerForm
+                                customer={editCustomer}
+                                onSubmit={(data) => {
+                                    if (editCustomer) {
+                                        updateCustomerMutation.mutate({ ...data, id: editCustomer.id });
+                                    } else {
+                                        createCustomerMutation.mutate(data);
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
         </MainLayout>

@@ -63,7 +63,7 @@ export default function Sales() {
 
   const filteredOrders = React.useMemo(() => {
     return orders.filter(order => {
-      const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+      const orderDate = new Date(order.createdAt || new Date()).toISOString().split('T')[0];
       return orderDate >= dateRange.start && orderDate <= dateRange.end;
     });
   }, [orders, dateRange]);
@@ -75,7 +75,7 @@ export default function Sales() {
   const salesByCategory = React.useMemo(() => {
     const categoryMap = new Map<string, number>();
     filteredOrders.forEach(order => {
-      order.items.forEach((item: OrderItemWithName) => {
+      (JSON.parse(order.items) as any[]).forEach((item: OrderItemWithName) => {
         const product = products.find(p => p.id === item.productId);
         const category = product?.category || 'Unknown';
         const amount = Number(item.price) * item.quantity;
@@ -96,7 +96,7 @@ export default function Sales() {
   const topProducts = React.useMemo(() => {
     const productMap = new Map<string, number>();
     filteredOrders.forEach(order => {
-      order.items.forEach((item: OrderItemWithName) => {
+      (JSON.parse(order.items) as any[]).forEach((item: OrderItemWithName) => {
         productMap.set(item.productName, (productMap.get(item.productName) || 0) + item.quantity);
       });
     });
@@ -123,30 +123,43 @@ export default function Sales() {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 print:p-0">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 print:hidden">
-          <h1 className="text-2xl font-bold">Sales Analytics</h1>
-          <div className="flex flex-wrap gap-2 items-center">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <Input
-                type="date"
-                value={dateRange.start}
-                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                className="w-[120px] text-xs md:text-sm"
-              />
-              <span className="text-xs md:text-sm">to</span>
-              <Input
-                type="date"
-                value={dateRange.end}
-                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                className="w-[120px] text-xs md:text-sm"
-              />
+      <div className="container mx-auto px-4 py-6 lg:px-6 print:p-0 max-w-7xl">
+        {/* Header Section */}
+        <div className="flex flex-col space-y-4 lg:flex-row lg:justify-between lg:items-center lg:space-y-0 mb-6 print:hidden">
+          <div className="flex flex-col space-y-2">
+            <h1 className="text-xl font-bold sm:text-2xl lg:text-3xl">Sales Analytics</h1>
+            <p className="text-sm text-muted-foreground hidden sm:block">
+              Track your sales performance and trends
+            </p>
+          </div>
+
+          {/* Controls Section */}
+          <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3 sm:items-center">
+            {/* Date Range Picker */}
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <div className="flex space-x-1 sm:space-x-2">
+                <Input
+                  type="date"
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                  className="w-28 sm:w-32 text-xs"
+                />
+                <span className="text-xs text-muted-foreground self-center">to</span>
+                <Input
+                  type="date"
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                  className="w-28 sm:w-32 text-xs"
+                />
+              </div>
             </div>
-            <Button size="sm" className="text-xs md:text-sm" onClick={handleExportPDF} variant="outline">
-              <Download className="mr-1 h-3 w-3 md:mr-2 md:h-4 md:w-4" />
-              <span className="hidden xs:inline">Export PDF</span>
-              <span className="xs:hidden">PDF</span>
+
+            {/* Export Button */}
+            <Button size="sm" onClick={handleExportPDF} variant="outline" className="w-fit">
+              <Download className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Export PDF</span>
+              <span className="sm:hidden">PDF</span>
             </Button>
           </div>
         </div>
@@ -298,9 +311,9 @@ export default function Sales() {
                   <TableRow key={order.id}>
                     <TableCell>#{order.id}</TableCell>
                     <TableCell>
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Date(order.createdAt || new Date()).toLocaleDateString()}
                     </TableCell>
-                    <TableCell>{order.items.length} items</TableCell>
+                    <TableCell>{(JSON.parse(order.items) as any[]).length} items</TableCell>
                     <TableCell>{order.paymentMethod}</TableCell>
                     <TableCell>{formatPrice(Number(order.total))}</TableCell>
                   </TableRow>

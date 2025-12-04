@@ -267,51 +267,79 @@ export function UserManagementCard({ onAuthRequired }: UserManagementCardProps) 
 
             {/* Add User Dialog */}
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Add New User</DialogTitle>
+                <DialogContent className="max-w-full h-full max-h-full p-0 gap-0 bg-background">
+                    <DialogHeader className="px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                        <DialogTitle className="text-xl font-semibold">Add New User</DialogTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Create a new user account with appropriate permissions
+                        </p>
                     </DialogHeader>
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="user-name">Name</Label>
-                            <Input
-                                id="user-name"
-                                value={formData.name}
-                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                placeholder="Enter user name"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="user-role">Role</Label>
-                            <Select
-                                value={formData.role}
-                                onValueChange={(value) =>
-                                    setFormData(prev => ({ ...prev, role: value as "admin" | "cashier" }))
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="cashier">Cashier</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                            <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    setShowAddDialog(false);
-                                    setShowPinDialog(true);
-                                    setPinDialogMode('create');
-                                }}
-                                disabled={!formData.name.trim()}
-                            >
-                                Next: Set PIN
-                            </Button>
+
+                    <div className="flex-1 overflow-y-auto px-6 py-6">
+                        <div className="max-w-md mx-auto space-y-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="user-name" className="text-base font-medium">Full Name</Label>
+                                <Input
+                                    id="user-name"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="Enter user's full name"
+                                    className="h-12"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="user-role" className="text-base font-medium">User Role</Label>
+                                <Select
+                                    value={formData.role}
+                                    onValueChange={(value) =>
+                                        setFormData(prev => ({ ...prev, role: value as "admin" | "cashier" }))
+                                    }
+                                >
+                                    <SelectTrigger className="h-12">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="cashier">
+                                            <div className="flex items-center gap-2">
+                                                <User className="h-4 w-4" />
+                                                <div>
+                                                    <div className="font-medium">Cashier</div>
+                                                    <div className="text-xs text-muted-foreground">Process sales and transactions</div>
+                                                </div>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="admin">
+                                            <div className="flex items-center gap-2">
+                                                <Shield className="h-4 w-4" />
+                                                <div>
+                                                    <div className="font-medium">Admin</div>
+                                                    <div className="text-xs text-muted-foreground">Full system access and management</div>
+                                                </div>
+                                            </div>
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowAddDialog(false)}
+                                    className="flex-1 h-12"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        setShowAddDialog(false);
+                                        setShowPinDialog(true);
+                                        setPinDialogMode('create');
+                                    }}
+                                    disabled={!formData.name.trim()}
+                                    className="flex-1 h-12"
+                                >
+                                    Next: Set PIN
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </DialogContent>
@@ -319,44 +347,75 @@ export function UserManagementCard({ onAuthRequired }: UserManagementCardProps) 
 
             {/* Edit User Dialog */}
             <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Edit User</DialogTitle>
+                <DialogContent className="max-w-full h-full max-h-full p-0 gap-0 bg-background">
+                    <DialogHeader className="px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                        <DialogTitle className="text-xl font-semibold">Edit User</DialogTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Update user information and permissions
+                        </p>
                     </DialogHeader>
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-name">Name</Label>
-                            <Input
-                                id="edit-name"
-                                value={formData.name}
-                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                placeholder="Enter user name"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-role">Role</Label>
-                            <Select
-                                value={formData.role}
-                                onValueChange={(value) =>
-                                    setFormData(prev => ({ ...prev, role: value as "admin" | "cashier" }))
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="cashier">Cashier</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-                                Cancel
-                            </Button>
-                            <Button onClick={handleEditUser} disabled={!formData.name.trim()}>
-                                Save Changes
-                            </Button>
+
+                    <div className="flex-1 overflow-y-auto px-6 py-6">
+                        <div className="max-w-md mx-auto space-y-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-name" className="text-base font-medium">Full Name</Label>
+                                <Input
+                                    id="edit-name"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="Enter user's full name"
+                                    className="h-12"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-role" className="text-base font-medium">User Role</Label>
+                                <Select
+                                    value={formData.role}
+                                    onValueChange={(value) =>
+                                        setFormData(prev => ({ ...prev, role: value as "admin" | "cashier" }))
+                                    }
+                                >
+                                    <SelectTrigger className="h-12">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="cashier">
+                                            <div className="flex items-center gap-2">
+                                                <User className="h-4 w-4" />
+                                                <div>
+                                                    <div className="font-medium">Cashier</div>
+                                                    <div className="text-xs text-muted-foreground">Process sales and transactions</div>
+                                                </div>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="admin">
+                                            <div className="flex items-center gap-2">
+                                                <Shield className="h-4 w-4" />
+                                                <div>
+                                                    <div className="font-medium">Admin</div>
+                                                    <div className="text-xs text-muted-foreground">Full system access and management</div>
+                                                </div>
+                                            </div>
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowEditDialog(false)}
+                                    className="flex-1 h-12"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={handleEditUser}
+                                    disabled={!formData.name.trim()}
+                                    className="flex-1 h-12"
+                                >
+                                    Save Changes
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </DialogContent>
