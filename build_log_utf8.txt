@@ -1,0 +1,116 @@
+﻿
+> opensauce-pos@1.6.7 build:electron:main
+> esbuild electron/main.ts --platform=node --format=cjs --bundle --outfile=dist/main.cjs --external:electron --external:electron-log --external:better-sqlite3 --external:drizzle-orm/better-sqlite3 --external:drizzle-orm/better-sqlite3/migrator --external:fs --external:path --external:os --external:escpos --external:escpos-usb --external:escpos-network --external:usb --external:rate-limiter-flexible --external:zod --external:diagnostics_channel && esbuild electron/preload.ts --platform=node --format=cjs --bundle --outfile=dist/preload.cjs --external:electron --external:electron-log --external:zod --external:rate-limiter-flexible
+
+node.exe : X [ERROR] 
+Expected "finally" 
+but found "async"
+At line:1 char:1
++ & "C:\Program Files\
+nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (X [ERROR]    
+ Expec...t found "    
+async":String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+
+    electron/main.ts:4
+02:0:
+      402 Γöé async 
+function 
+createWindow() {
+          Γöé ~~~~~
+          Γò╡ finally
+
+1 error
+node:child_process:964
+    throw err;
+    ^
+
+Error: Command 
+failed: 
+E:\Code\Code\POS Updat
+ed\node_modules\@esbui
+ld\win32-x64\esbuild.e
+xe electron/main.ts 
+--platform=node 
+--format=cjs --bundle 
+--outfile=dist/main.cj
+s --external:electron 
+--external:electron-lo
+g --external:better-sq
+lite3 --external:drizz
+le-orm/better-sqlite3 
+--external:drizzle-orm
+/better-sqlite3/migrat
+or --external:fs 
+--external:path 
+--external:os 
+--external:escpos 
+--external:escpos-usb 
+--external:escpos-netw
+ork --external:usb --e
+xternal:rate-limiter-f
+lexible 
+--external:zod --exter
+nal:diagnostics_channe
+l
+    at 
+genericNodeError (node
+:internal/errors:985:1
+5)
+    at wrappedFn (node
+:internal/errors:539:1
+4)
+    at 
+checkExecSyncError (no
+de:child_process:925:1
+1)
+    at 
+Object.execFileSync (n
+ode:child_process:961:
+15)
+    at 
+Object.<anonymous> 
+(E:\Code\Code\POS Upda
+ted\node_modules\esbui
+ld\bin\esbuild:222:28)
+    at 
+Module._compile (node:
+internal/modules/cjs/l
+oader:1761:14)
+    at Object..js (nod
+e:internal/modules/cjs
+/loader:1893:10)
+    at Module.load (no
+de:internal/modules/cj
+s/loader:1481:32)
+    at Module._load (n
+ode:internal/modules/c
+js/loader:1300:12)
+    at TracingChannel.
+traceSync (node:diagno
+stics_channel:328:14) 
+{
+  status: 1,
+  signal: null,
+  output: [ null, 
+null, null ],
+  pid: 9116,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.12.0

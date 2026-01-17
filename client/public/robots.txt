@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Block API endpoints (if exposed on same domain)
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://test.pos.rt8.co.za/sitemap.xml

@@ -16,10 +16,11 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { useQuery } from "@tanstack/react-query";
-import type { Customer } from "@shared/schema";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import type { Customer } from "../../../../shared/types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CustomerForm } from "@/components/customers/customer-form";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api";
+import { queryClient } from "../../lib/queryClient";
 import { offlineDataManager } from "@/lib/offline-data-manager";
 import { useToast } from "@/hooks/use-toast";
 
@@ -121,6 +122,9 @@ export function CustomerSelect({ selectedCustomer, onSelectCustomer }: CustomerS
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Add New Customer</DialogTitle>
+                    </DialogHeader>
                     <CustomerForm onSubmit={handleCreateCustomer} />
                 </DialogContent>
             </Dialog>

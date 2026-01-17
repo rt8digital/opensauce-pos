@@ -1,0 +1,9 @@
+This is a placeholder for the NSIS installer sidebar image.
+
+To create a proper sidebar image for your installer:
+
+1. Create a 164x314 pixel image with your branding
+2. Save it as "sidebar.bmp" in this directory
+3. Use 24-bit BMP format for best compatibility
+
+The sidebar will appear on the left side of the installer wizard.

@@ -1,0 +1,86 @@
+{
+  "timestamp": "2026-01-01T10:58:35.180Z",
+  "totalTests": 12,
+  "passedTests": 12,
+  "failedTests": 0,
+  "passRate": "100.00%",
+  "testResults": [
+    {
+      "name": "Create user with valid data",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Create user without name (should fail)",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Get all users",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Filter users by role",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "PIN storage security",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Login simulation",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Update user information",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Delete user",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "SQL injection prevention",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "PIN format validation",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Role-based access control",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Owner user creation",
+      "status": "PASS",
+      "error": null
+    }
+  ],
+  "securityIssues": [
+    "PIN stored in plain text - should be hashed"
+  ],
+  "summary": {
+    "status": "ALL TESTS PASSED",
+    "issuesFound": [],
+    "securityConcerns": 1
+  },
+  "recommendations": [
+    "Implement PIN hashing for secure storage",
+    "Add account status/active field for user management",
+    "Implement failed login attempt tracking",
+    "Add session management with timeout",
+    "Consider implementing unique constraints on PINs",
+    "Add comprehensive input validation",
+    "Implement proper error handling and logging"
+  ]
+}

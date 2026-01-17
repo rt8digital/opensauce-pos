@@ -43,7 +43,8 @@ CREATE TABLE `products` (
 	`stock_quantity` integer NOT NULL,
 	`barcode` text NOT NULL,
 	`plu` text,
-	`category` text DEFAULT 'General' NOT NULL
+	`category` text DEFAULT 'General' NOT NULL,
+	`created_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `products_barcode_unique` ON `products` (`barcode`);--> statement-breakpoint

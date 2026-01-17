@@ -1,7 +1,8 @@
 import * as React from "react"
 import { type DialogProps } from "@radix-ui/react-dialog"
 import { Command as CommandPrimitive } from "cmdk"
-import { Search } from "lucide-react"
+import { Search, Keyboard } from "lucide-react"
+import { useVirtualKeyboard } from "@/contexts/virtual-keyboard-context"
 
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -38,19 +39,39 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
->(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-    <CommandPrimitive.Input
-      ref={ref}
-      className={cn(
-        "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-        className
-      )}
-      {...props}
-    />
-  </div>
-))
+>(({ className, ...props }, ref) => {
+  const { openKeyboard } = useVirtualKeyboard();
+
+  return (
+    <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+      <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      <CommandPrimitive.Input
+        ref={ref}
+        className={cn(
+          "flex h-11 w-full rounded-md bg-transparent py-3 pr-10 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        {...props}
+      />
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+          if (input) {
+            input.focus();
+            openKeyboard(input);
+          }
+        }}
+        className="ml-2 text-muted-foreground hover:text-primary transition-colors p-1"
+        tabIndex={-1}
+        aria-label="Open virtual keyboard"
+      >
+        <Keyboard className="h-4 w-4" />
+      </button>
+    </div>
+  );
+})
 
 CommandInput.displayName = CommandPrimitive.Input.displayName
 

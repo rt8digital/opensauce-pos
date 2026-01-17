@@ -1,22 +1,48 @@
 import { test, expect } from '@playwright/test';
 
+async function authenticate(page: any) {
+  await page.goto('/login');
+  await page.waitForLoadState('networkidle');
+  await page.waitForSelector('[data-testid="login-pin-input"]', { timeout: 30000 });
+  
+  // Enter PIN using PinKeypad buttons (123456)
+  await page.getByRole('button', { name: '1' }).click();
+  await page.getByRole('button', { name: '2' }).click();
+  await page.getByRole('button', { name: '3' }).click();
+  await page.getByRole('button', { name: '4' }).click();
+  await page.getByRole('button', { name: '5' }).click();
+  await page.getByRole('button', { name: '6' }).click();
+  
+  // Submit login
+  await page.getByRole('button', { name: 'Enter' }).click();
+  
+  // Wait for redirect
+  await page.waitForURL('/', { timeout: 30000 });
+}
+
 test('Application works offline', async ({ page }) => {
-  await page.goto('/');
+  // Authenticate first
+  await authenticate(page);
   
   // Wait for app to load
-  await expect(page.getByText('Point of Sale')).toBeVisible();
+  await expect(page.getByTestId('nav-pos')).toBeVisible();
   
   // Simulate offline mode
   await page.context().setOffline(true);
   
-  // Try to add an item to cart
-  const productElements = await page.locator('[class*="grid"] [class*="button"], [class*="product"]').first();
-  if ((await productElements.count()) > 0) {
-    await productElements.click();
-  }
+  // Wait for product grid to load
+  await page.waitForSelector('[data-testid="product-grid"]', { timeout: 10000 });
   
-  // Check that item is added despite offline status
-  await expect(page.locator('text=Cart is empty')).not.toBeVisible();
+  // Try to add an item to cart using the proper product selector
+  const productCard = page.locator('[data-testid="product-grid"] > div > div').first();
+  await productCard.waitFor({ state: 'visible' });
+  await productCard.click();
+  
+  // Wait for cart state to update
+  await page.waitForLoadState('networkidle');
+  
+  // Check that cart is not empty by verifying a total amount is shown
+  await expect(page.locator('text=/Total.*[1-9]|[1-9].*Total/')).toBeVisible();
   
   // Restore online mode
   await page.context().setOffline(false);

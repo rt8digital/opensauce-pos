@@ -1,5 +1,6 @@
 import { bluetoothService } from './bluetooth-service';
 import { isCapacitor } from '@/utils/capacitor';
+import { PrinterEncoding } from '@/lib/printer-encoding';
 
 /**
  * Service for managing Bluetooth ESC/POS printers
@@ -108,24 +109,42 @@ export class BluetoothPrinterService {
     /**
      * Generate ESC/POS commands for a simple receipt
      * @param text - Text to print
+     * @param options - Printing options including codepage
      */
-    generateReceiptData(text: string): Uint8Array {
-        // Basic ESC/POS commands
+    generateReceiptData(text: string, options?: { codepage?: string }): Uint8Array {
+        // ESC/POS commands
         const ESC = 0x1B;
         const GS = 0x1D;
-        const AT = 0x40; // Initialize
         const LF = 0x0A; // Line feed
+        
+        // Use provided codepage or default to cp437
+        const codepage = options?.codepage || 'cp437';
 
-        const encoder = new TextEncoder();
-        const textData = encoder.encode(text);
-
-        // Initialize + Text + Cut
+        // Initialize printer with proper encoding setup
         const commands = [
-            ESC, AT,           // Initialize
-            ...textData,       // Text content
-            LF, LF, LF,        // Feed lines
-            GS, 0x56, 0x42, 0x00 // Cut paper
+            ...PrinterEncoding.getInitializationCommands(codepage),
+            ESC, 0x21, 0x00,             // Select print mode (standard mode)
+            ESC, 0x33, 0x10,             // Set line spacing to 16
+            GS, 0x21, 0x00,              // Normal size mode
         ];
+
+        // Split text into lines and add each with proper line feeds
+        const lines = text.split('\n');
+
+        lines.forEach(line => {
+            // Use PrinterEncoding to properly encode the text
+            const lineBytes = PrinterEncoding.encodeText(line, codepage);
+            commands.push(...Array.from(lineBytes));
+
+            // Add line feed
+            commands.push(LF);
+        });
+
+        // Add cut command
+        commands.push(
+            ESC, 0x64, 0x02,             // Feed 2 lines before cut
+            GS, 0x56, 0x42, 0x00         // Cut paper
+        );
 
         return new Uint8Array(commands);
     }

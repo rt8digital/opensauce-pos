@@ -1,9 +1,13 @@
 import { offlineSync } from './offline-sync';
 import { apiRequest, queryClient } from './queryClient';
-import type { Product, Order, Customer, Discount, Settings } from '@shared/schema';
+import type { Product, Order, Customer, Discount, Settings } from '../../../../shared/types';
 
 class OfflineDataManager {
     private isOnline = navigator.onLine;
+
+    private get isElectron(): boolean {
+        return typeof (window as any).electronAPI !== 'undefined';
+    }
 
     constructor() {
         // Listen for network changes
@@ -21,16 +25,24 @@ class OfflineDataManager {
     async getProducts(): Promise<Product[]> {
         if (this.isOnline) {
             try {
-                const response = await apiRequest('GET', '/api/products');
-                const products = await response.json();
+                const products = this.isElectron ? await (window as any).electronAPI.getProducts() : await (await apiRequest('GET', '/api/products')).json();
+
+                // Ensure products is an array
+                const productsArray = Array.isArray(products) ? products : [];
 
                 // Cache in IndexedDB for offline use
-                await offlineSync.storeProducts(products);
+                await offlineSync.storeProducts(productsArray);
 
-                return products;
-            } catch (error) {
+                return productsArray;
+            } catch (error: any) {
+                // Check if the error is specifically about database not being initialized
+                if (error.message && error.message.includes('Database not initialized')) {
+                    console.warn('Database not initialized, returning empty products list:', error);
+                    return [];
+                }
                 console.warn('Failed to fetch products from API, falling back to cache:', error);
-                return offlineSync.getProducts();
+                const cachedProducts = await offlineSync.getProducts();
+                return Array.isArray(cachedProducts) ? cachedProducts : [];
             }
         } else {
             return offlineSync.getProducts();
@@ -40,13 +52,15 @@ class OfflineDataManager {
     async createProduct(product: Omit<Product, 'id'>): Promise<Product> {
         if (this.isOnline) {
             try {
-                const response = await apiRequest('POST', '/api/products', product);
-                const newProduct = await response.json();
+                const response = this.isElectron ? await (window as any).electronAPI.createProduct(product) : await (await apiRequest('POST', '/api/products', product)).json();
+                const newProduct = response?.data ? response.data : response;
 
                 // Update cache
                 const products = await offlineSync.getProducts();
-                products.push(newProduct);
-                await offlineSync.storeProducts(products);
+                if (Array.isArray(products)) {
+                    products.push(newProduct);
+                    await offlineSync.storeProducts(products);
+                }
 
                 return newProduct;
             } catch (error) {
@@ -65,8 +79,7 @@ class OfflineDataManager {
     async updateProduct(id: number, updates: Partial<Product>): Promise<Product> {
         if (this.isOnline) {
             try {
-                const response = await apiRequest('PATCH', `/api/products/${id}`, updates);
-                const updatedProduct = await response.json();
+                const updatedProduct = this.isElectron ? await (window as any).electronAPI.updateProduct(id, updates) : await (await apiRequest('PATCH', `/api/products/${id}`, updates)).json();
 
                 // Update cache
                 const products = await offlineSync.getProducts();
@@ -92,27 +105,35 @@ class OfflineDataManager {
     async getCustomers(): Promise<Customer[]> {
         if (this.isOnline) {
             try {
-                const response = await apiRequest('GET', '/api/customers');
-                const customers = await response.json();
+                const customers = this.isElectron ? await (window as any).electronAPI.getCustomers() : await (await apiRequest('GET', '/api/customers')).json();
+
+                // Ensure customers is an array
+                const customersArray = Array.isArray(customers) ? customers : [];
 
                 // Cache in IndexedDB
-                await offlineSync.storeCustomers(customers);
+                await offlineSync.storeCustomers(customersArray);
 
-                return customers;
-            } catch (error) {
+                return customersArray;
+            } catch (error: any) {
+                // Check if the error is specifically about database not being initialized
+                if (error.message && error.message.includes('Database not initialized')) {
+                    console.warn('Database not initialized, returning empty customers list:', error);
+                    return [];
+                }
                 console.warn('Failed to fetch customers from API, falling back to cache:', error);
-                return offlineSync.getCustomers();
+                const cachedCustomers = await offlineSync.getCustomers();
+                return Array.isArray(cachedCustomers) ? cachedCustomers : [];
             }
         } else {
-            return offlineSync.getCustomers();
+            const cachedCustomers = await offlineSync.getCustomers();
+            return Array.isArray(cachedCustomers) ? cachedCustomers : [];
         }
     }
 
     async createCustomer(customer: Omit<Customer, 'id' | 'createdAt' | 'loyaltyPoints' | 'totalSpent'>): Promise<Customer> {
         if (this.isOnline) {
             try {
-                const response = await apiRequest('POST', '/api/customers', customer);
-                const newCustomer = await response.json();
+                const newCustomer = this.isElectron ? await (window as any).electronAPI.createCustomer(customer) : await (await apiRequest('POST', '/api/customers', customer)).json();
 
                 // Update cache
                 const customers = await offlineSync.getCustomers();
@@ -135,8 +156,7 @@ class OfflineDataManager {
     async createOrder(order: Omit<Order, 'id' | 'createdAt'>): Promise<Order> {
         if (this.isOnline) {
             try {
-                const response = await apiRequest('POST', '/api/orders', order);
-                const newOrder = await response.json();
+                const newOrder = this.isElectron ? await (window as any).electronAPI.createOrder(order) : await (await apiRequest('POST', '/api/orders', order)).json();
                 return newOrder;
             } catch (error) {
                 console.warn('Failed to create order online, queuing for later:', error);
@@ -153,14 +173,28 @@ class OfflineDataManager {
     async getSettings(): Promise<Settings | null> {
         if (this.isOnline) {
             try {
-                const response = await apiRequest('GET', '/api/settings');
-                const settings = await response.json();
+                const settings = this.isElectron ? await (window as any).electronAPI.getSettings() : await (await apiRequest('GET', '/api/settings')).json();
 
                 // Cache in IndexedDB
                 await offlineSync.storeSettings(settings);
 
                 return settings;
-            } catch (error) {
+            } catch (error: any) {
+                // Check if the error is specifically about database not being initialized
+                if (error.message && error.message.includes('Database not initialized')) {
+                    console.warn('Database not initialized, returning default settings:', error);
+                    // Return default settings when database is not available
+                    return {
+                        id: 1,
+                        storeName: 'OpenSauce P.O.S.',
+                        currency: 'R',
+                        theme: 'light',
+                        language: 'en',
+                        deviceRole: 'standalone',
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                }
                 console.warn('Failed to fetch settings from API, falling back to cache:', error);
                 return offlineSync.getSettings();
             }
@@ -172,8 +206,7 @@ class OfflineDataManager {
     async updateSettings(settings: Partial<Settings>): Promise<Settings> {
         if (this.isOnline) {
             try {
-                const response = await apiRequest('PATCH', '/api/settings', settings);
-                const updatedSettings = await response.json();
+                const updatedSettings = this.isElectron ? await (window as any).electronAPI.updateSettings(settings) : await (await apiRequest('PATCH', '/api/settings', settings)).json();
 
                 // Update cache
                 await offlineSync.storeSettings(updatedSettings);

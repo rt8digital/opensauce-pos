@@ -1,30 +1,52 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Printer, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface NumericKeypadProps {
   onPLUSubmit: (plu: string) => void;
   onAddAmount: (amount: string) => void;
   onDisplayChange?: (display: string) => void;
   disableKeyboard?: boolean;
+  onNumber?: (num: string) => void;
+  onEnter?: () => void;
+  isMultiplicationMode?: boolean;
+  multiplicationDisplay?: string;
+  onReprint?: () => void;
+  onPageUp?: () => void;
+  onPageDown?: () => void;
+  onVoid?: () => void;
 }
 
-export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange, disableKeyboard = false }: NumericKeypadProps) {
+export const NumericKeypad = React.memo(function NumericKeypad({
+  onPLUSubmit,
+  onAddAmount,
+  onDisplayChange,
+  disableKeyboard = false,
+  onNumber,
+  onEnter,
+  isMultiplicationMode = false,
+  multiplicationDisplay = '',
+  onReprint,
+  onPageUp,
+  onPageDown,
+  onVoid
+}: NumericKeypadProps) {
+  // ... (rest of the component stays the same)
   const [display, setDisplay] = React.useState('');
   const [operator, setOperator] = React.useState<string | null>(null);
   const [firstNumber, setFirstNumber] = React.useState<number | null>(null);
   const [newNumber, setNewNumber] = React.useState(true);
 
-  const handleNumberClick = (num: string) => {
+  const handleNumberClick = React.useCallback((num: string) => {
     if (newNumber) {
       setDisplay(num);
       setNewNumber(false);
     } else {
       setDisplay(prev => prev + num);
     }
-  };
+  }, [newNumber]);
 
-  const handleOperator = (op: string) => {
+  const handleOperator = React.useCallback((op: string) => {
     const currentNumber = parseFloat(display);
 
     if (firstNumber === null) {
@@ -37,9 +59,9 @@ export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange, disab
 
     setOperator(op);
     setNewNumber(true);
-  };
+  }, [display, firstNumber, operator]);
 
-  const calculate = (a: number, b: number, op: string): number => {
+  const calculate = React.useCallback((a: number, b: number, op: string): number => {
     switch (op) {
       case '+': return a + b;
       case '-': return a - b;
@@ -47,25 +69,14 @@ export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange, disab
       case '/': return b !== 0 ? a / b : 0;
       default: return b;
     }
-  };
+  }, []);
 
-  const handleEquals = () => {
-    if (operator && firstNumber !== null) {
-      const currentNumber = parseFloat(display);
-      const result = calculate(firstNumber, currentNumber, operator);
-      setDisplay(result.toString());
-      setFirstNumber(null);
-      setOperator(null);
-      setNewNumber(true);
-    }
-  };
-
-  const handleClear = () => {
+  const handleClear = React.useCallback(() => {
     setDisplay('');
     setOperator(null);
     setFirstNumber(null);
     setNewNumber(true);
-  };
+  }, []);
 
   // Notify parent of display changes
   React.useEffect(() => {
@@ -77,6 +88,12 @@ export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange, disab
     if (disableKeyboard) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Allow normal behavior in input fields
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+
       // Prevent default behavior for numeric keys to avoid conflicts
       if (/[0-9]|\.|\+|\-|\*|\/|\=|Enter|Escape|Backspace/.test(e.key)) {
         e.preventDefault();
@@ -107,20 +124,19 @@ export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange, disab
         else if (['-', '/'].includes(e.key)) {
           handleOperator(e.key);
         }
-        // Handle Enter key
+        // Handle Enter key - reserved for other functions, not PLU submission
         else if (e.key === 'Enter') {
-          // Enter button - adds amount as custom value or adds PLU entry as item
+          // Enter button - adds amount as custom value only (not PLU submission)
+          // PLU submission should use the + key
           if (display && !operator) {
             const trimmedDisplay = display.trim();
             // Check if the display is a valid number (for custom amount)
             if (!isNaN(parseFloat(trimmedDisplay))) {
               // If it's a valid number, add it as a custom amount
               onAddAmount(trimmedDisplay);
-            } else {
-              // Otherwise, treat it as a PLU code
-              onPLUSubmit(trimmedDisplay);
+              handleClear();
             }
-            handleClear();
+            // Note: PLU codes should be submitted using the + key, not Enter
           }
         }
         // Handle Escape key (Clear)
@@ -143,70 +159,101 @@ export function NumericKeypad({ onPLUSubmit, onAddAmount, onDisplayChange, disab
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [disableKeyboard, display, operator, firstNumber, newNumber, onPLUSubmit, onAddAmount, handleNumberClick, handleOperator, handleClear]);
+  }, [disableKeyboard, display, operator, onPLUSubmit, onAddAmount, handleNumberClick, handleOperator, handleClear]);
 
-  // Define the new 3-column layout buttons
-  const buttons = [
-    '7', '8', '9',
-    '4', '5', '6',
-    '1', '2', '3',
-    '0', '00', '.',
-    '*', 'C', 'PLU',
-    'x/time', '=', 'Enter'
-  ];
+  // Define the new 4-column layout buttons (including Enter button in the same row)
+  const buttons = React.useMemo(() => [
+    '7', '8', '9', 'C',
+    '4', '5', '6', 'REPRINT',
+    '1', '2', '3', 'PAGE_DOWN',
+    '0', '00', '.', 'PAGE_UP',
+    'PLU', 'VOID', 'ITEM', 'Enter'
+  ], []);
 
   return (
-    <div className="h-[calc(50vh-65px)] flex flex-col p-1.5 bg-card rounded-lg border shadow-sm">
-      <div className="flex-1 grid grid-cols-3 gap-1">
-        {buttons.map((key) => (
-          <Button
-            key={key}
-            variant={
-              key === 'C' ? "destructive" :
-                key === '*' || key === '=' || key === 'x/time' || key === 'PLU' || key === 'Enter' ? "secondary" :
-                  "outline"
-            }
-            className="h-12"
-            onClick={() => {
-              if (key === 'C') {
-                handleClear();
-              } else if (key === 'Enter') {
-                // Enter button - adds amount as custom value or PLU entry
-                if (display && !operator) {
-                  const trimmedDisplay = display.trim();
-                  // Check if the display is a valid number (for custom amount)
-                  if (!isNaN(parseFloat(trimmedDisplay))) {
-                    // If it's a valid number, add it as a custom amount
-                    onAddAmount(trimmedDisplay);
-                  } else {
-                    // Otherwise, treat it as a PLU code
-                    onPLUSubmit(trimmedDisplay);
-                  }
-                  handleClear();
-                }
-              } else if (key === '=') {
-                handleEquals();
-              } else if (key === '*') {
-                handleOperator('*');
-              } else if (key === 'x/time') {
-                // x/time button acts as multiplication
-                handleOperator('*');
-              } else if (key === 'PLU') {
-                // PLU button - submit PLU code to add item to cart
-                if (display && !operator) {
-                  const trimmedDisplay = display.trim();
-                  onPLUSubmit(trimmedDisplay);
-                  handleClear();
-                }
-              } else if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '.'].includes(key)) {
-                handleNumberClick(key);
+    <div className="h-full flex flex-col p-1.5 bg-card rounded-lg border shadow-sm">
+      {/* Multiplication Mode Display */}
+      {isMultiplicationMode && (
+        <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded-md">
+          <div className="text-xs text-green-800 font-medium">MULTIPLY MODE</div>
+          <div className="text-sm font-mono text-green-900">
+            × {multiplicationDisplay || '0'}
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 flex flex-col gap-1">
+        {/* All rows in 4-column grid */}
+        <div className="grid grid-cols-4 gap-1 flex-1">
+          {buttons.map((key) => (
+            <Button
+              key={key}
+              variant={
+                key === 'C' ? "destructive" :
+                  key === 'REPRINT' || key === 'PAGE_UP' || key === 'PAGE_DOWN' || key === '=' || key === 'VOID' || key === 'PLU' || key === 'Enter' ? "secondary" :
+                    "outline"
               }
-            }}
-          >
-            {key}
-          </Button>
-        ))}
+              className="flex-1 h-auto min-h-[44px] overflow-hidden px-1 py-3 text-base font-bold"
+              onClick={() => {
+                if (key === 'C') {
+                  handleClear();
+                } else if (key === 'ITEM') {
+                  // ITEM button - add custom amount as item with sequential naming
+                  if (display && !operator) {
+                    const trimmedDisplay = display.trim();
+                    // Check if the display is a valid number (for custom amount)
+                    if (!isNaN(parseFloat(trimmedDisplay))) {
+                      // If it's a valid number, add it as a custom amount
+                      onAddAmount(trimmedDisplay);
+                    }
+                    handleClear();
+                  }
+                } else if (key === 'REPRINT') {
+                  onReprint?.();
+                } else if (key === 'PAGE_UP') {
+                  onPageUp?.();
+                } else if (key === 'PAGE_DOWN') {
+                  onPageDown?.();
+                } else if (key === 'VOID') {
+                  // VOID button - open void item dialog
+                  onVoid?.();
+                } else if (key === 'PLU') {
+                  // PLU button - submit PLU code to add item to cart
+                  if (display && !operator) {
+                    const trimmedDisplay = display.trim();
+                    onPLUSubmit(trimmedDisplay);
+                    handleClear();
+                  }
+                } else if (key === 'Enter') {
+                  // Enter button - handle multiplication mode or add custom amount only (not PLU submission)
+                  if (isMultiplicationMode && onEnter) {
+                    onEnter();
+                  } else if (display && !operator) {
+                    const trimmedDisplay = display.trim();
+                    // Check if the display is a valid number (for custom amount)
+                    if (!isNaN(parseFloat(trimmedDisplay))) {
+                      // If it's a valid number, add it as a custom amount
+                      onAddAmount(trimmedDisplay);
+                      handleClear();
+                    }
+                  }
+                } else if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '.'].includes(key)) {
+                  if (isMultiplicationMode && onNumber) {
+                    onNumber(key);
+                  } else {
+                    handleNumberClick(key);
+                  }
+                }
+              }}
+            >
+              {key === 'REPRINT' ? <Printer className="h-5 w-5" /> :
+                key === 'PAGE_UP' ? <ChevronUp className="h-5 w-5" /> :
+                  key === 'PAGE_DOWN' ? <ChevronDown className="h-5 w-5" /> :
+                    key}
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   );
-}
+});

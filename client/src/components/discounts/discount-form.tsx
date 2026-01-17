@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertDiscountSchema, type InsertDiscount, type Discount } from "@shared/schema";
+import { insertDiscountSchema, type NewDiscount, type Discount } from "../../../../shared/types";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -22,11 +22,11 @@ import { Switch } from "@/components/ui/switch";
 
 interface DiscountFormProps {
     discount?: Discount | null;
-    onSubmit: (data: InsertDiscount) => void;
+    onSubmit: (data: NewDiscount) => void;
 }
 
 export function DiscountForm({ discount, onSubmit }: DiscountFormProps) {
-    const form = useForm<InsertDiscount>({
+    const form = useForm<NewDiscount>({
         resolver: zodResolver(insertDiscountSchema),
         defaultValues: discount || {
             name: "",
@@ -82,7 +82,31 @@ export function DiscountForm({ discount, onSubmit }: DiscountFormProps) {
                         <FormItem>
                             <FormLabel>Value</FormLabel>
                             <FormControl>
-                                <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                                <Input 
+                                    type="text" 
+                                    inputMode="decimal"
+                                    placeholder="0.00" 
+                                    className="h-7 w-20 text-xs [-webkit-appearance:none] [appearance:none] [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none"
+                                    {...field}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      // Allow empty input or valid decimal numbers
+                                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                        field.onChange(value);
+                                      }
+                                    }}
+                                    onKeyDown={(e) => {
+                                      // Prevent non-numeric characters except decimal point
+                                      if (!/[0-9.]/.test(e.key) && 
+                                          !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                                        e.preventDefault();
+                                      }
+                                      // Prevent multiple decimal points
+                                      if (e.key === '.' && e.currentTarget.value.includes('.')) {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -99,7 +123,7 @@ export function DiscountForm({ discount, onSubmit }: DiscountFormProps) {
                             </div>
                             <FormControl>
                                 <Switch
-                                    checked={field.value}
+                                    checked={!!field.value}
                                     onCheckedChange={field.onChange}
                                 />
                             </FormControl>

@@ -21,6 +21,8 @@ out/
 *.db
 *.sqlite
 *.sqlite3
+*.db-shm
+*.db-wal
 
 # Logs
 logs/
@@ -79,7 +81,7 @@ jspm_packages/
 
 # Gatsby files
 .cache/
-public
+/public
 
 # Storybook build outputs
 .out
@@ -109,6 +111,7 @@ Thumbs.db
 # Electron
 app/dist/
 release/
+dist-electron/
 
 # Capacitor
 android/
@@ -117,6 +120,7 @@ ios/
 # Playwright
 test-results/
 playwright-report/
+
 
 # Vite
 vite.config.ts.timestamp-*
@@ -127,7 +131,31 @@ server/public/
 # Local development
 .local/
 .qoder/
+.wwebjs_auth/
 
 # Debug files
 debug-*.png
 debug-*.json
+
+# Generated/Temp files
+null
+nul
+.dev-data/
+.clientDB/
+.agent/
+.wwebjs_auth/
+electron/*.exe
+electron/*.zip
+electron/*.dll
+electron/*.pak
+electron/*.dat
+electron/*.bin
+release/
+dist/
+status_output.txt
+*.log
+tsc_errors.txt
+tsc_output.txt
+tsc_output_utf8.txt
+db-inspection-output.txt
+settings-db-report.txt

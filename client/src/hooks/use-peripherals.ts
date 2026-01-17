@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ReceiptPrinter } from '@/lib/printer';
-import { BarcodeScanner } from '@/lib/scanner';
+import { scanner as BarcodeScanner } from '@/lib/scanner';
 import { CashDrawer } from '@/lib/cash-drawer';
 import { CustomerDisplay } from '@/lib/customer-display';
 import { Scale } from '@/lib/scale';
@@ -19,10 +19,10 @@ export const usePeripherals = () => {
     isInitialized: false,
     isDiscovering: false,
   });
-  
+
   const { toast } = useToast();
   const [printer, setPrinter] = useState<ReceiptPrinter>(ReceiptPrinter.getInstance());
-  const [scanner, setScanner] = useState<BarcodeScanner>(BarcodeScanner.getInstance());
+  const [scanner, setScanner] = useState(BarcodeScanner);
   const [cashDrawer, setCashDrawer] = useState<CashDrawer>(CashDrawer.getInstance());
   const [customerDisplay, setCustomerDisplay] = useState<CustomerDisplay>(CustomerDisplay.getInstance());
   const [scale, setScale] = useState<Scale>(Scale.getInstance());
@@ -208,10 +208,38 @@ export const usePeripherals = () => {
     }
   };
 
+  // Print Cash Out Report
+  const printCashOutReport = async (summary: any, actuals: any, printerType?: 'usb' | 'network' | 'bluetooth', printerAddress?: string) => {
+    try {
+      const result = await printer.printCashOutReport(summary, actuals, printerType, printerAddress);
+      if (result) {
+        toast({
+          title: 'Print Success',
+          description: 'Cash out report printed successfully',
+        });
+      } else {
+        toast({
+          title: 'Print Failed',
+          description: 'Failed to print cash out report',
+          variant: 'destructive',
+        });
+      }
+      return result;
+    } catch (error) {
+      console.error('Error printing cash out report:', error);
+      toast({
+        title: 'Print Error',
+        description: 'Error printing cash out report',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
   return {
     // State
     ...state,
-    
+
     // Core services
     printer,
     scanner,
@@ -219,12 +247,13 @@ export const usePeripherals = () => {
     customerDisplay,
     scale,
     peripheralManager,
-    
+
     // Methods
     discoverDevices,
     testConnection,
     getDevicesByType,
     printReceipt,
+    printCashOutReport,
     openCashDrawer,
     readScaleWeight,
     updateCustomerDisplay,

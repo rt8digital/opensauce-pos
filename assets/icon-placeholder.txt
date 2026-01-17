@@ -1,0 +1,16 @@
+This is a placeholder for the application icon.
+
+To create a proper icon for your Electron app:
+
+1. Create a 256x256 pixel PNG image with your logo/design
+2. Convert it to ICO format using an online converter or image editor
+3. Save it as "icon.ico" in this directory
+
+Recommended tools:
+- Online converters: convertio.co, cloudconvert.com
+- Image editors: GIMP, Photoshop
+- Command line: ImageMagick (`magick input.png icon.ico`)
+
+For the installer sidebar image:
+1. Create a 164x314 pixel BMP image
+2. Save it as "sidebar.bmp" in the assets/installer/ directory

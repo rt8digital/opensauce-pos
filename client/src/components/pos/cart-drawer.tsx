@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { Cart } from "./cart";
-import type { Product, Discount } from "@shared/schema";
+import type { Product, Discount } from "../../../../shared/types";
 
 interface CartItem {
     product: Product | { id: number; name: string; price: string };
@@ -63,10 +63,6 @@ export function CartDrawer({
                         cart={cart}
                         onUpdateQuantity={onUpdateQuantity}
                         onRemoveItem={onRemoveItem}
-                        onCheckout={onCheckout}
-                        discounts={discounts}
-                        selectedDiscount={selectedDiscount}
-                        onSelectDiscount={onSelectDiscount}
                     />
                 </div>
             </DrawerContent>

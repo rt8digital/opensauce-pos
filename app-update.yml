@@ -1,0 +1,5 @@
+provider: github
+owner: your-github-username
+repo: opensauce-pos
+private: false
+vPrefixedTagName: false

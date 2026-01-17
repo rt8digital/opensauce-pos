@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertCustomerSchema, type InsertCustomer, type Customer } from "@shared/schema";
+import { insertCustomerSchema, type NewCustomer, type Customer } from '../../../../shared/types';
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -23,18 +23,24 @@ import { PhoneInput } from "@/components/ui/phone-input";
 
 interface CustomerFormProps {
     customer?: Customer | null;
-    onSubmit: (data: InsertCustomer) => void;
+    onSubmit: (data: NewCustomer) => void;
     onDelete?: () => void;
 }
 
 export function CustomerForm({ customer, onSubmit, onDelete }: CustomerFormProps) {
-    const form = useForm<InsertCustomer>({
+    const defaultValues: NewCustomer = customer ? {
+        name: customer.name,
+        email: customer.email ?? undefined,
+        phone: customer.phone ?? undefined,
+    } : {
+        name: "",
+        email: "",
+        phone: "",
+    };
+
+    const form = useForm<NewCustomer>({
         resolver: zodResolver(insertCustomerSchema),
-        defaultValues: customer || {
-            name: "",
-            email: "",
-            phone: "",
-        },
+        defaultValues,
     });
 
     return (

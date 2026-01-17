@@ -1,0 +1,181 @@
+{
+  "testResults": {
+    "passed": 7,
+    "failed": 4,
+    "errors": [],
+    "tests": [
+      {
+        "name": "Products Table Schema Validation",
+        "status": "PASSED",
+        "error": null
+      },
+      {
+        "name": "Categories Table Schema Validation",
+        "status": "PASSED",
+        "error": null
+      },
+      {
+        "name": "Foreign Key Constraints",
+        "status": "FAILED",
+        "error": false
+      },
+      {
+        "name": "Unique Constraints",
+        "status": "PASSED",
+        "error": null
+      },
+      {
+        "name": "Price Field Data Type",
+        "status": "PASSED",
+        "error": null
+      },
+      {
+        "name": "Stock Quantity Field Data Type",
+        "status": "PASSED",
+        "error": null
+      },
+      {
+        "name": "Required Fields Validation",
+        "status": "PASSED",
+        "error": null
+      },
+      {
+        "name": "Default Value Validation",
+        "status": "PASSED",
+        "error": null
+      },
+      {
+        "name": "Business Logic Constraints",
+        "status": "FAILED",
+        "error": false
+      },
+      {
+        "name": "Index Recommendations",
+        "status": "FAILED",
+        "error": false
+      },
+      {
+        "name": "Data Integrity Issues",
+        "status": "FAILED",
+        "error": false
+      }
+    ],
+    "summary": {
+      "total": 11,
+      "passed": 7,
+      "failed": 4,
+      "issuesFound": 14,
+      "passRate": "63.64",
+      "totalTime": "5ms",
+      "timestamp": "2026-01-01T11:48:14.690Z"
+    }
+  },
+  "databaseAnalysis": {
+    "fileExists": true,
+    "fileSize": 217088,
+    "databaseType": "SQLite",
+    "tables": [],
+    "productsCount": 0,
+    "categoriesCount": 0,
+    "schema": {
+      "products": {
+        "fields": [
+          "id (INTEGER PRIMARY KEY AUTOINCREMENT)",
+          "name (TEXT NOT NULL)",
+          "price (TEXT NOT NULL)",
+          "cost (TEXT DEFAULT \"0\")",
+          "image (TEXT NOT NULL)",
+          "stock_quantity (INTEGER NOT NULL)",
+          "barcode (TEXT NOT NULL UNIQUE)",
+          "plu (TEXT)",
+          "category_id (INTEGER)",
+          "category (TEXT DEFAULT \"General\" NOT NULL)"
+        ],
+        "constraints": [
+          "PRIMARY KEY on id",
+          "UNIQUE constraint on barcode",
+          "FORE KEY constraint on category_id REFERENCES categories(id)"
+        ]
+      },
+      "categories": {
+        "fields": [
+          "id (INTEGER PRIMARY KEY AUTOINCREMENT)",
+          "name (TEXT NOT NULL UNIQUE)",
+          "description (TEXT)",
+          "created_at (INTEGER)"
+        ],
+        "constraints": [
+          "PRIMARY KEY on id",
+          "UNIQUE constraint on name"
+        ]
+      }
+    }
+  },
+  "issuesFound": [
+    "Products table missing foreign key constraint to categories table",
+    "Test failed: Foreign Key Constraints - false",
+    "BUSINESS LOGIC: No constraint to prevent negative prices",
+    "BUSINESS LOGIC: No constraint to prevent negative stock quantities",
+    "BUSINESS LOGIC: No constraint to validate barcode format/length",
+    "BUSINESS LOGIC: No constraint to validate PLU format/length",
+    "Test failed: Business Logic Constraints - false",
+    "PERFORMANCE: Consider adding INDEX on PLU field for faster searches",
+    "PERFORMANCE: Consider adding INDEX on category_id for category-based queries",
+    "PERFORMANCE: Consider adding INDEX on name field for search functionality",
+    "Test failed: Index Recommendations - false",
+    "INTEGRITY: No foreign key constraint - products could reference non-existent categories",
+    "INTEGRITY: No soft delete mechanism - products are hard deleted",
+    "Test failed: Data Integrity Issues - false"
+  ],
+  "recommendations": [
+    {
+      "priority": "HIGH",
+      "category": "Data Validation",
+      "issue": "Missing business logic constraints",
+      "recommendation": "Add CHECK constraints for: negative prices, negative stock, barcode format validation, PLU format validation",
+      "impact": "Prevents invalid data entry at database level"
+    },
+    {
+      "priority": "HIGH",
+      "category": "Data Integrity",
+      "issue": "Missing foreign key constraint",
+      "recommendation": "Ensure products.category_id has FOREIGN KEY constraint with CASCADE delete",
+      "impact": "Prevents orphaned records and enables automatic cleanup"
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Performance",
+      "issue": "Missing indexes on frequently queried fields",
+      "recommendation": "Add indexes on: PLU, category_id, name (for search)",
+      "impact": "Improved query performance for product lookups and searches"
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Business Logic",
+      "issue": "No soft delete capability",
+      "recommendation": "Consider adding is_active field or deleted_at field for soft deletes",
+      "impact": "Maintains data history and prevents accidental data loss"
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Data Validation",
+      "issue": "Price stored as TEXT",
+      "recommendation": "Consider using NUMERIC or DECIMAL type for prices with proper precision",
+      "impact": "Better data type safety and arithmetic operations"
+    },
+    {
+      "priority": "LOW",
+      "category": "Schema Design",
+      "issue": "Category field redundancy",
+      "recommendation": "Consider removing category field from products table, use category_id only",
+      "impact": "Eliminates data redundancy and potential inconsistencies"
+    },
+    {
+      "priority": "LOW",
+      "category": "Data Validation",
+      "issue": "No data versioning",
+      "recommendation": "Consider adding created_at, updated_at fields with triggers",
+      "impact": "Better audit trail and data change tracking"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-01-01T10:55:54.120Z",
+  "totalTests": 6,
+  "passedTests": 1,
+  "failedTests": 5,
+  "passRate": "16.67%",
+  "testResults": [
+    {
+      "name": "Create user with valid data",
+      "status": "FAIL",
+      "error": "db.run is not a function"
+    },
+    {
+      "name": "Create user without name (should fail)",
+      "status": "FAIL",
+      "error": "Expected NOT NULL constraint error, got: db.run is not a function"
+    },
+    {
+      "name": "Get all users",
+      "status": "FAIL",
+      "error": "db.all is not a function"
+    },
+    {
+      "name": "PIN storage security",
+      "status": "FAIL",
+      "error": "db.run is not a function"
+    },
+    {
+      "name": "Login simulation",
+      "status": "FAIL",
+      "error": "db.run is not a function"
+    },
+    {
+      "name": "SQL injection prevention",
+      "status": "PASS",
+      "error": null
+    }
+  ],
+  "securityIssues": [],
+  "summary": {
+    "status": "SOME TESTS FAILED",
+    "issuesFound": [
+      "Create user with valid data",
+      "Create user without name (should fail)",
+      "Get all users",
+      "PIN storage security",
+      "Login simulation"
+    ],
+    "securityConcerns": 0
+  }
+}

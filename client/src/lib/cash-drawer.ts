@@ -1,5 +1,3 @@
-import { ipcRenderer } from 'electron';
-
 export class CashDrawer {
   private static instance: CashDrawer;
   private isOpen: boolean = false;

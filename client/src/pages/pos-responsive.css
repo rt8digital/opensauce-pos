@@ -1,0 +1,114 @@
+/* Responsive styles for POS page */
+@media (max-width: 1024px) {
+  .pos-main-layout {
+    flex-direction: column;
+  }
+
+  .pos-sidebar {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    height: 100vh;
+    z-index: 50;
+    transition: right 0.3s ease;
+  }
+
+  .pos-sidebar.open {
+    right: 0;
+  }
+
+  .pos-content-area {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .mobile-nav-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: hsl(var(--background));
+    border-top: 1px solid hsl(var(--border));
+    display: flex;
+    justify-content: space-around;
+    padding: 0.5rem;
+  }
+
+  .mobile-nav-button {
+    flex: 1;
+    margin: 0 0.25rem;
+  }
+}
+
+/* For even smaller screens */
+@media (max-width: 768px) {
+  .pos-search-section {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .pos-search-input {
+    width: 100%;
+  }
+
+  .pos-category-select {
+    width: 100%;
+  }
+
+  .pos-action-buttons {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .pos-action-button {
+    flex: 1;
+    min-width: 120px;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Ensure text truncation for long product names */
+.pos-product-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Better touch targets for mobile */
+.pos-touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Responsive cart item display */
+.pos-cart-item {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.pos-cart-item-details {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Responsive numpad */
+.pos-numpad-container {
+  width: 100%;
+  height: 38%;
+}
+
+.pos-numpad-row {
+  width: 100%;
+  justify-content: center;
+}
+
+.pos-numpad-button {
+  flex: 1;
+  margin: 0.25rem;
+  min-height: 60px;
+}

@@ -1,108 +1,66 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
-import path, { dirname } from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { fileURLToPath } from "url";
-import { VitePWA } from 'vite-plugin-pwa';
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 export default defineConfig({
+  root: './client',
+  base: './',
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
+    hmr: {
+      overlay: false, // Disable error overlay for better performance
+    },
+  },
+  build: {
+    outDir: '../dist/renderer',
+    emptyOutDir: true,
+    sourcemap: false, // Disable sourcemaps for faster builds
+    commonjsOptions: {
+      include: [/@zxing\/library/, /node_modules/],
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'wouter'],
+          'ui-vendor': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-slot',
+            '@radix-ui/react-toast',
+            'lucide-react',
+            'framer-motion'
+          ],
+          'utils-vendor': ['clsx', 'tailwind-merge', 'date-fns', 'zod'],
+        }
+      }
+    }
+  },
   plugins: [
     react(),
-    runtimeErrorOverlay(),
-    themePlugin(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-      manifest: {
-        name: 'OpenSauce P.O.S.',
-        short_name: 'POS',
-        description: 'Modern Point of Sale System',
-        theme_color: '#000000',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: '/icon-192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: '/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-              },
-            },
-          },
-          {
-            urlPattern: /^\/api\/.*/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              networkTimeoutSeconds: 10,
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5, // 5 minutes
-              },
-            },
-          },
-        ],
-      },
+    visualizer({
+      open: false,
+      filename: '../dist/stats.html',
+      gzipSize: true,
+      brotliSize: true,
     }),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "client", "src"),
-      "@shared": path.resolve(__dirname, "shared"),
+      '@': resolve(__dirname, './client/src'),
+      '@shared': resolve(__dirname, './shared'),
     },
   },
-  root: path.resolve(__dirname, "client"),
-  build: {
-    outDir: path.resolve(__dirname, "dist/public"),
-    emptyOutDir: true,
-    // Optimize for mobile
-    target: 'es2015',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: process.env.NODE_ENV === 'production', // Remove console.logs in production
-        drop_debugger: true,
-      },
-    },
-    rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'client/index.html'),
-        db_manager: path.resolve(__dirname, 'client/db-manager.html'),
-      }
-    }
-  },
-  server: {
-    port: 5177,
-    host: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5001',
-        changeOrigin: true,
-      },
-    },
+  optimizeDeps: {
+    include: [
+      'lucide-react',
+      '@zxing/library',
+      'framer-motion',
+      'react-hook-form',
+      '@tanstack/react-query',
+      'recharts'
+    ],
   },
 });

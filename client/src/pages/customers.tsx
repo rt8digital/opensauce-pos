@@ -17,29 +17,37 @@ import {
 } from '@/components/ui/dialog';
 import { CustomerForm } from '@/components/customers/customer-form';
 import { MainLayout } from '@/components/layout/main-layout';
-import { Plus, Edit2, Search, Users } from 'lucide-react';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { Plus, Edit2, Search, Users, X } from 'lucide-react';
+import { apiRequest } from '@/lib/api';
+import { queryClient } from '@/lib/queryClient';
+import { offlineDataManager } from '@/lib/offline-data-manager';
 import { useToast } from '@/hooks/use-toast';
+import { useKeyboardShortcuts, commonShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { Input } from '@/components/ui/input';
-import type { Customer } from '@shared/schema';
+import { useDebounce } from '@/hooks/use-debounce';
+import type { Customer } from '../../../../shared/types';
 
 export default function Customers() {
     const [editCustomer, setEditCustomer] = React.useState<Customer | null>(null);
     const [showForm, setShowForm] = React.useState(false);
     const [searchTerm, setSearchTerm] = React.useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+    const searchInputRef = React.useRef<HTMLInputElement>(null);
     const { toast } = useToast();
 
     const { data: customers = [], isLoading } = useQuery<Customer[]>({
         queryKey: ['/api/customers'],
+        queryFn: () => offlineDataManager.getCustomers(),
+        staleTime: 5 * 60 * 1000, // 5 minutes
     });
 
     const filteredCustomers = React.useMemo(() => {
         return customers.filter(c =>
-            c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (c.phone && c.phone.includes(searchTerm))
+            c.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+            (c.email && c.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
+            (c.phone && c.phone.includes(debouncedSearchTerm))
         );
-    }, [customers, searchTerm]);
+    }, [customers, debouncedSearchTerm]);
 
     const createCustomerMutation = useMutation({
         mutationFn: async (data: any) => {
@@ -95,11 +103,32 @@ export default function Customers() {
                     <div className="relative flex-1">
                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
+                            ref={searchInputRef}
                             placeholder="Search customers..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-8 text-sm"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Delete') {
+                                setSearchTerm('');
+                                searchInputRef.current?.focus();
+                              }
+                            }}
+                            className="pl-8 pr-10 text-sm"
                         />
+                        {searchTerm && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    searchInputRef.current?.focus();
+                                }}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted"
+                                data-testid="button-clear-search"
+                            >
+                                <X className="h-3 w-3" />
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -116,7 +145,9 @@ export default function Customers() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredCustomers.map((customer) => (
+                            {filteredCustomers.map((customer) => {
+                                const totalSpentValue = isNaN(Number(customer.totalSpent)) ? 0 : Number(customer.totalSpent);
+                                return (
                                 <TableRow key={customer.id}>
                                     <TableCell className="font-medium max-w-[140px]">
                                         <div className="truncate text-sm">{customer.name}</div>
@@ -124,7 +155,7 @@ export default function Customers() {
                                     <TableCell className="hidden md:table-cell">{customer.email || '-'}</TableCell>
                                     <TableCell className="hidden md:table-cell">{customer.phone || '-'}</TableCell>
                                     <TableCell>{customer.loyaltyPoints}</TableCell>
-                                    <TableCell>${Number(customer.totalSpent).toFixed(2)}</TableCell>
+                                    <TableCell>${totalSpentValue.toFixed(2)}</TableCell>
                                     <TableCell className="text-right">
                                         <Button
                                             variant="ghost"
@@ -139,7 +170,8 @@ export default function Customers() {
                                         </Button>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            );
+                            })}
                             {filteredCustomers.length === 0 && (
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">

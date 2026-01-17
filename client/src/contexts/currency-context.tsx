@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '../lib/queryClient';
+import { apiRequest } from '@/lib/queryClient';
 
 type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'INR' | 'ZAR';
 

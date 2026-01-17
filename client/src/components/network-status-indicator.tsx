@@ -20,7 +20,7 @@ export function NetworkStatusIndicator() {
     if (!showOffline) return null;
 
     return (
-        <div className="fixed top-4 right-4 z-50 animate-in fade-in slide-in-from-top-2">
+        <div className="fixed bottom-5 right-0 z-50 animate-in fade-in slide-in-from-top-2">
             <Alert
                 variant={isOnline ? 'default' : 'destructive'}
                 className="w-auto shadow-lg"

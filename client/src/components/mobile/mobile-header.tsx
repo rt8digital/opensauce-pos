@@ -28,7 +28,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
         if (onBack) {
             onBack();
         } else {
-            navigate(-1);
+            window.history.back();
         }
     };
 

@@ -4,11 +4,87 @@
 
 @layer base {
   :root {
+    /* Premium Light Theme (Zinc & Orange) */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 24 95% 53%;
+
+    --radius: 1rem;
+
     /* Safe area insets for notched devices */
     --safe-area-top: env(safe-area-inset-top);
     --safe-area-bottom: env(safe-area-inset-bottom);
     --safe-area-left: env(safe-area-inset-left);
     --safe-area-right: env(safe-area-inset-right);
+  }
+
+  /* Global Touch Target & Sizing Enforcements */
+  button,
+  input,
+  select,
+  [role="button"] {
+    min-height: 3.5rem;
+    /* 56px minimum touch target */
+  }
+
+  /* Increase base font size for readability */
+  html {
+    font-size: 16px;
+  }
+
+  .dark {
+    /* Premium Dark Theme (Zinc & Neon Green) */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 142.1 86.2% 50%;
+    --primary-foreground: 240 10% 3.9%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 142.1 86.2% 50%;
   }
 
   * {
@@ -17,6 +93,7 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     /* Prevent pull-to-refresh on mobile */
     overscroll-behavior-y: contain;
     /* Smooth scrolling handled by browser defaults */
@@ -41,6 +118,25 @@
       -webkit-user-select: none;
       user-select: none;
     }
+  }
+
+  /* Receipt Customization Fonts */
+  @font-face {
+    font-family: 'ReceiptStandard';
+    font-display: swap;
+    src: local('Courier New'), local('Courier'), monospace;
+  }
+
+  @font-face {
+    font-family: 'ReceiptModern';
+    font-display: swap;
+    src: local('Inter font'), local('Segoe UI'), sans-serif;
+  }
+
+  @font-face {
+    font-family: 'ReceiptCondensed';
+    font-display: swap;
+    src: local('Arial Narrow'), sans-serif;
   }
 }
 
@@ -127,8 +223,121 @@
   /* Mobile viewport height fix */
   .h-screen-mobile {
     height: 100vh;
-    height: 100dvh;
+    height: 100lvh;
     /* Dynamic viewport height for mobile browsers */
+  }
+
+  /* Responsive POS layout */
+  .pos-main-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .pos-content-area {
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .pos-sidebar {
+    width: 450px;
+    border-left: 1px solid hsl(var(--border));
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background: hsl(var(--background));
+    position: relative;
+    z-index: 40;
+  }
+
+  .pos-mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: hsl(var(--background));
+    border-top: 1px solid hsl(var(--border));
+    display: flex;
+    justify-content: space-around;
+    padding: 0.5rem;
+    display: none;
+  }
+
+  .pos-mobile-nav.show {
+    display: flex;
+  }
+
+  .pos-mobile-nav-button {
+    flex: 1;
+    margin: 0 0.25rem;
+  }
+
+  .pos-sidebar-mobile {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    height: 100vh;
+    z-index: 60;
+    transition: right 0.3s ease;
+    background: hsl(var(--background));
+  }
+
+  .pos-sidebar-mobile.open {
+    right: 0;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .pos-main-layout {
+      flex-direction: column;
+    }
+
+    .pos-content-area {
+      height: calc(100vh - 60px);
+      /* Account for mobile nav */
+    }
+
+    .pos-sidebar {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100vh;
+      z-index: 50;
+      transition: transform 0.3s ease;
+      transform: translateX(100%);
+    }
+
+    .pos-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .pos-mobile-nav {
+      display: flex;
+    }
+
+    .pos-content-area.sidebar-open {
+      display: none;
+    }
+  }
+
+  @media (min-width: 769px) {
+    .pos-sidebar {
+      position: static;
+      height: 100vh;
+      transform: none;
+    }
+
+    .pos-mobile-nav {
+      display: none;
+    }
   }
 
   .min-h-screen-mobile {
@@ -145,12 +354,70 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     /* IE and Edge */
-    scrollbar-width: none;
-    /* Firefox */
+  }
+
+  /* Firefox scrollbar hiding - wrapped in @supports for better compatibility */
+  @supports (-moz-appearance: none) {
+    .scrollbar-hide {
+      scrollbar-width: none;
+    }
   }
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
     /* Chrome, Safari and Opera */
+  }
+
+  /* Subtitle dot pattern background */
+  .bg-dot-pattern {
+    background-color: transparent;
+    background-image: radial-gradient(hsl(var(--muted-foreground) / 0.3) 0.5px, transparent 0.5px);
+    background-size: 10px 10px;
+  }
+
+  /* Receipt Styles */
+  .receipt-font-standard {
+    font-family: 'ReceiptStandard', monospace;
+  }
+
+  .receipt-font-modern {
+    font-family: 'ReceiptModern', sans-serif;
+  }
+
+  .receipt-font-condensed {
+    font-family: 'ReceiptCondensed', sans-serif;
+  }
+
+  .receipt-font-mono {
+    font-family: 'monospace';
+  }
+
+  .receipt-divider-solid {
+    border-bottom: 2px solid black;
+  }
+
+  .receipt-divider-dashed {
+    border-bottom: 2px dashed black;
+  }
+
+  .receipt-divider-dotted {
+    border-bottom: 2px dotted black;
+  }
+
+  /* Support for border-top variants used in some components */
+  .receipt-divider-solid-t {
+    border-top: 2px solid black;
+  }
+
+  .receipt-divider-dashed-t {
+    border-top: 2px dashed black;
+  }
+
+  .receipt-divider-dotted-t {
+    border-top: 2px dotted black;
+  }
+
+  .receipt-compact-item {
+    @apply py-0.5;
   }
 }

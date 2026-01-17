@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { setupFirstUser, validatePin } from "@/lib/auth-utils";
-import { User } from "@shared/schema";
+import type { User } from "../../../../shared/types";
 
 interface FirstTimeSetupProps {
     open: boolean;

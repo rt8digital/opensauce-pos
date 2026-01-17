@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSauce P.O.S - Loading...</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        .splash-container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+            filter: brightness(0) invert(1);
+            animation: pulse 2s infinite;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .app-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0;
+            min-height: 25px;
+            transition: opacity 0.3s ease;
+        }
+
+        .progress-container {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #fff, #f0f0f0);
+            border-radius: 2px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            width: 0%;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .status-text {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .fade-out {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="splash-container">
+        <img src="logo.png" class="logo" alt="OpenSauce POS Logo">
+        <div class="app-title">OpenSauce P.O.S</div>
+        <div class="app-subtitle">Point of Sale System</div>
+
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadingText">Initializing...</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="status-text" id="statusText">Starting application...</div>
+        </div>
+    </div>
+
+    <script>
+        const loadingText = document.getElementById('loadingText');
+        const progressBar = document.getElementById('progressBar');
+        const statusText = document.getElementById('statusText');
+
+        let progress = 0;
+        const loadingMessages = [
+            { text: 'Initializing...', status: 'Starting application...' },
+            { text: 'Loading system...', status: 'Setting up core components...' },
+            { text: 'Connecting to database...', status: 'Establishing database connection...' },
+            { text: 'Starting server...', status: 'Launching backend services...' },
+            { text: 'Loading modules...', status: 'Initializing POS modules...' },
+            { text: 'Almost ready...', status: 'Finalizing startup sequence...' },
+            { text: 'Launching application...', status: 'Starting user interface...' }
+        ];
+
+        function updateLoadingStatus() {
+            if (progress < loadingMessages.length) {
+                const message = loadingMessages[progress];
+                loadingText.textContent = message.text;
+                statusText.textContent = message.status;
+                progressBar.style.width = `${(progress / (loadingMessages.length - 1)) * 100}%`;
+                progress++;
+
+                setTimeout(updateLoadingStatus, 800);
+            } else {
+                progressBar.style.width = '100%';
+                loadingText.textContent = 'Complete!';
+                statusText.textContent = 'Application ready';
+
+                // Fade out splash screen
+                setTimeout(() => {
+                    document.querySelector('.splash-container').classList.add('fade-out');
+                }, 500);
+            }
+        }
+
+        // Start the loading animation
+        updateLoadingStatus();
+
+        // Listen for messages from electron main process
+        if (typeof window !== 'undefined' && window.require) {
+            try {
+                const { ipcRenderer } = window.require('electron');
+
+                ipcRenderer.on('startup-progress', (event, data) => {
+                    if (data.status) {
+                        statusText.textContent = data.status;
+                    }
+                    if (data.progress !== undefined) {
+                        progressBar.style.width = `${data.progress}%`;
+                        loadingText.textContent = data.message || 'Loading...';
+                    }
+                });
+
+                ipcRenderer.on('startup-complete', () => {
+                    progressBar.style.width = '100%';
+                    loadingText.textContent = 'Complete!';
+                    statusText.textContent = 'Application ready';
+
+                    setTimeout(() => {
+                        document.querySelector('.splash-container').classList.add('fade-out');
+                    }, 300);
+                });
+            } catch (error) {
+                console.log('Electron IPC not available in this context');
+            }
+        }
+    </script>
+</body>
+
+</html>

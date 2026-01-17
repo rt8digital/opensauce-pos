@@ -1,0 +1,111 @@
+--- Database Analysis Report ---
+Date: 2025-12-31T12:51:03.239Z
+Target Database: E:\Code\Code\POS Updated\sqlite.db
+Connection Status: Connected
+
+Tables found: sqlite_sequence, discounts, order_items, products, customers, orders, settings, translations, users, bot_settings, categories, whatsapp_queue, whatsapp_consent, schema_migrations
+-------------------------
+
+Row Counts:
+- sqlite_sequence     : 9 rows
+- discounts           : 1 rows
+- order_items         : 0 rows
+- products            : 231 rows
+- customers           : 1 rows
+- orders              : 45 rows
+- settings            : 1 rows
+- translations        : 0 rows
+- users               : 2 rows
+- bot_settings        : 1 rows
+- categories          : 1 rows
+- whatsapp_queue      : 0 rows
+- whatsapp_consent    : 0 rows
+- schema_migrations   : 9 rows
+-------------------------
+
+Users:
+{"id":76,"name":"Test Admin","role":"admin","is_owner":1}
+{"id":77,"name":"Test Cashier","role":"cashier","is_owner":0}
+
+Settings:
+{
+  "id": 1,
+  "store_name": "FANA MINI WHOLESALE",
+  "store_address": "355 mayet drive, actonville",
+  "store_phone": "084201117",
+  "store_email": null,
+  "store_logo": null,
+  "currency": "R",
+  "printer_name": "",
+  "printer_type": "network",
+  "printer_ip": "",
+  "scanner_device_id": null,
+  "scanner_com_port": null,
+  "camera_device_id": null,
+  "cash_drawer_port": "",
+  "customer_display_type": null,
+  "customer_display_value": "",
+  "scale_port": null,
+  "scale_device_id": null,
+  "receipt_width": "80mm",
+  "receipt_custom_width": 80,
+  "receipt_header_text": "",
+  "receipt_footer_text": "",
+  "receipt_font_size": "large",
+  "receipt_show_logo": 1,
+  "receipt_show_order_number": 1,
+  "receipt_show_date": 1,
+  "receipt_show_customer": 0,
+  "receipt_show_payment_method": 1,
+  "receipt_show_barcode": 0,
+  "payment_qr_code": null,
+  "whatsapp_enabled": 1,
+  "whatsapp_phone_number": "0695529693",
+  "whatsapp_api_key": null,
+  "whatsapp_business_id": null,
+  "whatsapp_send_receipts": 1,
+  "theme": "system",
+  "language": "en",
+  "device_role": "standalone",
+  "server_ip_address": null,
+  "updated_at": 1766078530,
+  "autoBackupEnabled": 1,
+  "backupFrequency": "daily",
+  "backupLocation": null,
+  "sessionTimeout": 30,
+  "passwordMinLength": 6,
+  "passwordRequireSpecial": 0,
+  "lowStockThreshold": 10,
+  "stockAlertEnabled": 1,
+  "auditLoggingEnabled": 1,
+  "auditLogLevel": "info",
+  "cameraScannerEnabled": 1,
+  "cameraFacing": "back",
+  "cameraResolution": "auto",
+  "cameraTorchEnabled": 0,
+  "cameraContinuousScan": 0,
+  "cameraSupportedFormats": "qr_code,code_128,code_39,ean_13,ean_8,upc_a,upc_e"
+}
+
+Products (Preview):
+{"id":66,"name":"AQUELLE 500ML 6PACK","price":"45","stock_quantity":38,"category":"General"}
+{"id":67,"name":"x12 COKE 1.25L","price":"132","stock_quantity":29,"category":"General"}
+{"id":69,"name":"x8 COKE RETURN","price":"138","stock_quantity":43,"category":"General"}
+{"id":70,"name":"x6 KINGSLEY 2L FLAV","price":"62","stock_quantity":45,"category":"General"}
+{"id":71,"name":"x6 coke 2L","price":"135","stock_quantity":40,"category":"General"}
+{"id":73,"name":"x6 coke 2L flav","price":"115","stock_quantity":41,"category":"General"}
+{"id":74,"name":"x6 Spar Letta ","price":"100","stock_quantity":46,"category":"General"}
+{"id":75,"name":"x6 Kingsley 500ML","price":"115","stock_quantity":49,"category":"General"}
+{"id":76,"name":"6x Switch Cans","price":"175","stock_quantity":42,"category":"General"}
+{"id":77,"name":"x6 Mofaya cans","price":"180","stock_quantity":48,"category":"General"}
+
+- Products with negative stock: 0
+
+Orders (Latest 5):
+{"id":45,"total":"1290","status":"pending","created_at":1766130586}
+{"id":44,"total":"3040","status":"pending","created_at":1766130115}
+{"id":43,"total":"248","status":"pending","created_at":1766129897}
+{"id":42,"total":"276","status":"pending","created_at":1766129532}
+{"id":41,"total":"2920","status":"pending","created_at":1766128716}
+
+Analysis Complete.

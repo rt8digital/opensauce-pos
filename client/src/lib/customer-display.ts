@@ -1,5 +1,3 @@
-import { ipcRenderer } from 'electron';
-
 export interface DisplayContent {
   header?: string;
   items?: Array<{ name: string; price: string }>;

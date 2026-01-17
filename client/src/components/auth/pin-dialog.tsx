@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +51,7 @@ export function PinDialog({
     open,
     onOpenChange,
     title = "Enter PIN",
-    description = "Please enter your 6-digit PIN",
+    description = "safe, secure",
     onSubmit,
     submitLabel = "Submit",
     loading = false,
@@ -60,6 +60,47 @@ export function PinDialog({
     const [error, setError] = useState("");
     const [confirmPin, setConfirmPin] = useState("");
     const [isConfirmMode, setIsConfirmMode] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const displayPin = isConfirmMode ? confirmPin : pin;
+
+    // Handle physical keyboard input
+    useEffect(() => {
+        if (!open) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Prevent default behavior for number keys and backspace
+            if ((event.key >= '0' && event.key <= '9') || event.key === 'Backspace' || event.key === 'Enter') {
+                event.preventDefault();
+
+                if (event.key === 'Enter' && displayPin.length === 6) {
+                    // Simulate form submission
+                    const fakeEvent = { preventDefault: () => { } } as React.FormEvent;
+                    handleSubmit(fakeEvent);
+                    return;
+                }
+
+                if (event.key === 'Backspace') {
+                    handleNumpadBackspace();
+                } else if (event.key >= '0' && event.key <= '9') {
+                    handleNumpadClick(event.key);
+                }
+            }
+        };
+
+        // Focus the hidden input when dialog opens
+        setTimeout(() => {
+            if (inputRef.current) {
+                inputRef.current.focus();
+            }
+        }, 100);
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [open, displayPin.length, isConfirmMode]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -107,7 +148,6 @@ export function PinDialog({
         }
     };
 
-    const displayPin = isConfirmMode ? confirmPin : pin;
     const currentTitle = isConfirmMode ? "Confirm PIN" : title;
     const currentDescription = isConfirmMode
         ? "Please re-enter your PIN to confirm"

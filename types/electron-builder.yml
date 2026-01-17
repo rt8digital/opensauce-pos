@@ -1,0 +1,55 @@
+appId: com.opensauce.pos
+productName: OpenSauce POS
+copyright: Copyright © 2025 RT8 Digital Group
+
+directories:
+  output: build-output
+  buildResources: assets
+
+files:
+  - dist/**/*
+  - node_modules/**/*
+  - package.json
+  - migrations/**/*
+
+extraResources:
+  - from: scripts/backup-database.js
+    to: scripts/backup-database.js
+  - from: scripts/restore-database.js
+    to: scripts/restore-database.js
+  - from: scripts/repair-database.js
+    to: scripts/repair-database.js
+
+extraFiles:
+  - from: scripts/backup-database.bat
+    to: backup-database.bat
+  - from: scripts/restore-database.bat
+    to: restore-database.bat
+  - from: scripts/repair-database.bat
+    to: repair-database.bat
+  - from: scripts/migrate-database.bat
+    to: migrate-database.bat
+  - from: sqlite.db
+    to: database/sqlite.db
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.png
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  runAfterFinish: true
+  installerIcon: assets/icon.ico
+  uninstallerIcon: assets/uninstallerIcon.ico
+  include: scripts/installer_hooks.nsh
+  artifactName: "${productName}-Setup-${version}.${ext}"
+
+# Optimizations for 8GB RAM and HDD
+npmRebuild: false
+compression: normal
+buildDependenciesFromSource: false

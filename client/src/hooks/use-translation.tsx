@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import type { Settings } from '@shared/schema';
+import type { Settings } from '../../../../shared/types';
 
 type TranslationContextType = {
     t: (text: string) => string;

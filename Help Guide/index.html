@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opensauce: POS Master Guide</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #27ae60;
+            --text-color: #333;
+            --bg-color: #fff;
+            --light-gray: #f9f9f9;
+            --border-color: #ddd;
+            --code-bg: #f5f6fa;
+        }
+
+        body {
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--bg-color);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            color: var(--primary-color);
+            margin-top: 1.5em;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            border-bottom: 4px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+            color: var(--secondary-color);
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        ul,
+        ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: "Consolas", "Courier New", monospace;
+            color: #c0392b;
+            border: 1px solid #e1e1e1;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid #e1e1e1;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: #2c3e50;
+            border: none;
+            padding: 0;
+        }
+
+        .note,
+        .warning,
+        .tip {
+            border-left: 5px solid;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .note {
+            background-color: #e8f6f3;
+            border-color: var(--accent-color);
+        }
+
+        .warning {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .tip {
+            background-color: #d1ecf1;
+            border-color: #17a2b8;
+        }
+
+        .section-break {
+            page-break-before: always;
+        }
+
+        .toc {
+            background-color: var(--light-gray);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 3rem;
+        }
+
+        .toc h2 {
+            margin-top: 0;
+            border-bottom: none;
+            text-align: center;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+            columns: 2;
+        }
+
+        .toc>ul>li {
+            margin-bottom: 0.8rem;
+            font-weight: bold;
+        }
+
+        .toc ul ul {
+            columns: 1;
+            font-weight: normal;
+            margin-top: 0.3rem;
+            margin-left: 1rem;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--primary-color);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .toc a:hover {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--light-gray);
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .phase-card {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .phase-card h3 {
+            margin-top: 0;
+        }
+
+        .company-info {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--light-gray);
+            color: var(--secondary-color);
+        }
+
+        .diagram {
+            font-family: monospace;
+            white-space: pre;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            line-height: 1.2;
+            border: 1px dashed #ccc;
+            margin: 1rem 0;
+        }
+
+        .visual-tour-section {
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+        }
+
+        .visual-tour-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: block;
+            border: 1px solid #eee;
+        }
+
+        .tour-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .tour-feature {
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .tour-feature h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .tour-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media print {
+            body {
+                font-size: 11pt;
+                max-width: 100%;
+                padding: 0;
+                color: #000;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            .section-break {
+                page-break-before: always;
+            }
+
+            h1,
+            h2,
+            h3 {
+                page-break-after: avoid;
+            }
+
+            ul,
+            img,
+            pre,
+            blockquote {
+                page-break-inside: avoid;
+            }
+
+            a {
+                text-decoration: none;
+                color: #000;
+            }
+
+            .toc ul {
+                columns: 2;
+            }
+
+            .note,
+            .warning,
+            .tip {
+                border: 1px solid #ccc;
+                border-left-width: 5px;
+            }
+
+            .diagram {
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Opensauce: POS Master Guide</h1>
+    <p style="text-align: center; font-size: 1.2rem; color: #7f8c8d;">The Comprehensive Handbook for Users, Admins, and
+        Developers</p>
+
+    <div class="toc no-print">
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#introduction">1. Introduction</a></li>
+            <li><a href="#quick-start">2. Quick-Start Checklist</a></li>
+            <li><a href="#license">3. License Agreement</a></li>
+            <li><a href="#support-policy">4. Support & Service Policy</a></li>
+            <li><a href="#getting-started">5. Getting Started</a>
+                <ul>
+                    <li><a href="#installation">Installation & Launch</a></li>
+                    <li><a href="#login">Login & Security</a></li>
+                </ul>
+            </li>
+            <li><a href="#user-management">4. User Management</a></li>
+            <li><a href="#features">5. Core Features</a>
+                <ul>
+                    <li><a href="#sales-module">Sales & Checkout</a></li>
+                    <li><a href="#inventory-module">Inventory Management</a></li>
+                    <li><a href="#customer-module">Customer Management</a></li>
+                </ul>
+            </li>
+            <li><a href="#advanced-settings">6. Advanced Settings</a>
+                <ul>
+                    <li><a href="#store-customization">Store & General Settings</a></li>
+                    <li><a href="#receipt-customization">Receipt Customization</a></li>
+                    <li><a href="#peripherals">Hardware Connections</a></li>
+                </ul>
+            </li>
+            <li><a href="#networking">7. Networking & Sync</a></li>
+            <li><a href="#visual-tour">8. Interface Gallery</a>
+                <ul>
+                    <li><a href="#pos-screen-tour">Point of Sale</a></li>
+                    <li><a href="#inventory-tour">Inventory Dashboard</a></li>
+                    <li><a href="#analytics-tour">Reporting & Analytics</a></li>
+                </ul>
+            </li>
+            <li><a href="#tech-manual">9. Technical Manual</a></li>
+            <li><a href="#troubleshooting">10. Troubleshooting</a></li>
+            <li><a href="#roadmap">11. Product Roadmap</a></li>
+            <li><a href="#contact">12. Contact & Support</a></li>
+        </ul>
+    </div>
+
+    <!-- 1. INTRODUCTION -->
+    <div id="introduction">
+        <h2>1. Introduction</h2>
+        <p><strong>Thank you for choosing OpenSauce.</strong> You’ve made a smart investment in your business by
+            choosing a
+            system that you own, not rent. This guide contains everything you need to get up and running and how to
+            reach us when you need a hand.</p>
+        <p><strong>Opensauce: POS</strong> is a modern, reliable, and open-source Point of Sale system designed for
+            flexibility. It combines the power of web technologies (React, Node.js) with the stability of a desktop
+            application (Electron), ensuring a seamless experience whether you are online or offline.</p>
+    </div>
+
+    <!-- 2. QUICK-START -->
+    <div id="quick-start">
+        <h2>2. 🚀 Quick-Start Checklist</h2>
+        <ul>
+            <li><strong>Install:</strong> Run the OpenSauce setup file on your Windows machine.</li>
+            <li><strong>Database:</strong> Your system is pre-configured with a local SQLite database (No internet
+                required!).</li>
+            <li><strong>Inventory:</strong> Use the "Bulk Import" tool or scan your first item to start building your
+                stock list.</li>
+            <li><strong>Training:</strong> Spend 15 minutes clicking through the "Sales" and "Reporting" tabs. It’s
+                built to be intuitive!</li>
+        </ul>
+    </div>
+
+    <!-- 2. LICENSE -->
+    <div id="license">
+        <h2>2. Perpetual License Agreement</h2>
+        <p>This agreement is between <strong>Rotate Group (PTY) LTD</strong> ("Licensor") and the
+            <strong>Licensee</strong> (Store Owner).
+        </p>
+
+        <h3>1. The License</h3>
+        <ul>
+            <li><strong>Grant:</strong> Licensor grants a non-exclusive, perpetual license to use OpenSauce POS v1.6 on
+                the agreed number of devices.</li>
+            <li><strong>Ownership:</strong> You own the right to use the software forever. The code remains the
+                intellectual property of Rotate Group (PTY) LTD.</li>
+            <li><strong>No Monthly Fees:</strong> No recurring subscription is required for core POS functionality
+                (Inventory, Sales, Reporting).</li>
+        </ul>
+
+        <h3>2. Installation & Support</h3>
+        <ul>
+            <li><strong>Setup:</strong> Includes a one-time remote installation and 30 days of "Go-Live" support.</li>
+            <li><strong>Offline Operation:</strong> The system is offline-first. Data is stored on the local device;
+                Rotate Group is not responsible for data loss due to hardware failure or theft.</li>
+        </ul>
+
+        <h3>3. Restrictions & Pricing</h3>
+        <ul>
+            <li><strong>Restrictions:</strong> Licensee may not reverse-engineer, resell, or distribute the software to
+                third parties without written consent.</li>
+            <li><strong>Total Fee:</strong> R2,500.00 (Once-off payment via EFT / Card / Crypto).</li>
+        </ul>
+    </div>
+
+    <!-- 4. SUPPORT POLICY -->
+    <div id="support-policy">
+        <h2>4. 🛠 Support & Service Policy</h2>
+        <p>We provide <strong>Free Remote Support</strong> to ensure your business never stops. To keep this service
+            free and fair for everyone, please note our guidelines:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>What is FREE (Remote)</th>
+                    <th>What is PAID (Billable)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Software bugs or errors</td>
+                    <td>On-site callouts (Travel + Labor)</td>
+                </tr>
+                <tr>
+                    <td>Basic "How-To" questions</td>
+                    <td>Windows/Virus repairs</td>
+                </tr>
+                <tr>
+                    <td>VAS (Airtime) activation</td>
+                    <td>Setting up new printers/hardware</td>
+                </tr>
+                <tr>
+                    <td>Feature updates & patches</td>
+                    <td>Staff training sessions (after the first)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Support Channels:</h4>
+        <ul>
+            <li><strong>WhatsApp / Cell:</strong> 0847990432</li>
+            <li><strong>Remote Desktop:</strong> We use <em>Chrome Remote Desktop</em>. Please have
+                your Invite Code ready when you call.</li>
+            <li><strong>Hours:</strong> Monday – Friday (09:00 – 17:00). Emergency weekend support available via
+                WhatsApp.</li>
+        </ul>
+    </div>
+
+    <div class="section-break"></div>
+
+    <!-- 5. GETTING STARTED -->
+    <div id="getting-started">
+        <h2>5. Getting Started</h2>
+        <h3 id="Installation">Installing Your Program</h3>
+        <p>Download the .Zip file from the link provided, Extract the file to: C://OpenSauce POS</p>
+        <p>Once extracted, open the folder and launch the .Exe provided (You can set a shortcut to this program on your
+            desktop or start menu by 'Right Click' - 'Send To' - 'Desktop (Create Shortcut)' or 'Start Menu'</p>
+        <p>Once the program is open, You will be prompted to login</p>
+        <h3 id="login">Login & Security</h3>
+        <p>The system is pre-configured with two user roles:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Default PIN</th>
+                    <th>Access Level</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Administrator</strong></td>
+                    <td><code>888888</code></td>
+                    <td><strong>Full Access:</strong> Settings, Inventory Editing, User Management, All Reports.</td>
+                </tr>
+                <tr>
+                    <td><strong>Cashier</strong></td>
+                    <td><code>654321</code></td>
+                    <td><strong>Restricted:</strong> Sales, Basic Customer Lookup, Daily Sales Report only.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="visual-tour-section">
+            <img src="assets/sign in.png" alt="Sign In Screen" class="visual-tour-image">
+            <p style="text-align: center; font-style: italic;">The secure login interface with numeric PIN entry.</p>
+        </div>
+    </div>
+
+    <!-- 4. USER MANAGEMENT -->
+    <div id="user-management">
+        <h2>4. User Management</h2>
+        <p>Manage access levels and track staff performance through the robust User Management module.</p>
+        <div class="visual-tour-section">
+            <img src="assets/settings robust user management.png" alt="User Management" class="visual-tour-image">
+            <div class="tour-grid">
+                <div class="tour-feature">
+                    <h4>Role Assignment</h4>
+                    <p>Create staff accounts and assign roles (Admin, Cashier, Owner) to control access to sensitive
+                        data.</p>
+                </div>
+                <div class="tour-feature">
+                    <h4>Security</h4>
+                    <p>Assign unique PINs to each user for secure authentication and transaction logging.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-break"></div>
+
+    <!-- 5. CORE FEATURES -->
+    <div id="features">
+        <h2>5. Core Features</h2>
+
+        <h3 id="sales-module">🛒 Sales & Checkout</h3>
+        <p>The POS interface is optimized for speed and accuracy during high-volume periods.</p>
+        <div class="visual-tour-section">
+            <img src="assets/point of sale.png" alt="Point of Sale" class="visual-tour-image">
+            <div class="tour-grid">
+                <div class="tour-feature">
+                    <h4>Smart Cart</h4>
+                    <p>Real-time calculation of totals, taxes, and itemized lists.</p>
+                </div>
+                <div class="tour-feature">
+                    <h4>Checkout Flow</h4>
+                    <img src="assets/point of sale checkout.png" alt="Checkout" class="visual-tour-image"
+                        style="margin-top: 10px;">
+                    <p>Simple payment selection (Cash, Card, QR) for rapid processing.</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 id="inventory-module">📦 Inventory Management</h3>
+        <p>Keep your stock levels accurate with detailed item tracking and easy updates.</p>
+        <div class="visual-tour-section">
+            <img src="assets/inventory management.png" alt="Inventory Management" class="visual-tour-image">
+            <div class="tour-grid">
+                <div class="tour-feature">
+                    <h4>Ease of Use</h4>
+                    <img src="assets/inventory management ANP ease of use.png" alt="Easy Inventory"
+                        class="visual-tour-image" style="margin-top: 10px;">
+                    <p>Intuitive interface for adding products, setting categories, and tracking costs.</p>
+                </div>
+                <div class="tour-feature">
+                    <h4>Stock Control</h4>
+                    <p>Audit stock levels and identify top-selling items through the dashboard.</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 id="customer-module">👥 Customer Management</h3>
+        <p>Build lasting relationships with integrated customer profiles.</p>
+        <div class="visual-tour-section">
+            <img src="assets/customer management.png" alt="Customer Management" class="visual-tour-image">
+            <p style="text-align: center; font-style: italic;">Track loyalty, history, and contact details for every
+                customer.</p>
+        </div>
+    </div>
+
+    <div class="section-break"></div>
+
+    <!-- 6. ADVANCED SETTINGS -->
+    <div id="advanced-settings">
+        <h2>6. Advanced Settings</h2>
+        <p>The system offers deep customization options to tailor the POS to your specific business needs.</p>
+
+        <h3 id="store-customization">🏪 Store & General Settings</h3>
+        <p>Personalize your workspace and administrative details.</p>
+        <div class="visual-tour-section">
+            <img src="assets/settings gen.png" alt="General Settings" class="visual-tour-image">
+            <div class="tour-grid">
+                <div class="tour-feature">
+                    <h4>Store Info</h4>
+                    <p>Enter your store name, address, and currency preferences.</p>
+                </div>
+                <div class="tour-feature">
+                    <h4>Customizations</h4>
+                    <img src="assets/settings gen store customizations.png" alt="Store Customizations"
+                        class="visual-tour-image" style="margin-top: 10px;">
+                    <p>Configure taxes, service charges, and interface themes.</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 id="receipt-customization">🧾 Receipt Customization</h3>
+        <p>Navigate to <em>Settings > Receipts</em> to configure the look and feel of your thermal prints.</p>
+
+        <h4>Layout & Dimensions</h4>
+        <ul>
+            <li><strong>Paper Width:</strong> Support for standard <strong>80mm</strong> and narrow
+                <strong>58mm</strong>
+                rolls.
+            </li>
+            <li><strong>Compact Mode:</strong> Reduces vertical whitespace to save paper.</li>
+        </ul>
+
+        <h4>Branding & Visibility</h4>
+        <ul>
+            <li><strong>Store Logo:</strong> Upload and scale your logo to be printed at the top of every receipt.</li>
+            <li><strong>Custom Messages:</strong> Add custom Header (e.g., "Welcome!") and Footer (e.g., "No Refunds")
+                text.</li>
+            <li><strong>Visibility Toggles:</strong> Show or hide individual elements like Order Number, Date, Customer
+                Name, and Barcodes.</li>
+        </ul>
+
+        <h4>Font Control</h4>
+        <p>You can individually customize the font style and scale for different sections:</p>
+        <ul>
+            <li><strong>Header Font:</strong> Make your store name pop with a large, bold font.</li>
+            <li><strong>Item Details:</strong> Choose a highly readable font (like <em>Classic Thermal</em> or
+                <em>Digital Mono</em>) for product lists.
+            </li>
+            <li><strong>Scaling:</strong> Adjust the size percentage (50% - 250%) for readability.</li>
+        </ul>
+
+        <div class="visual-tour-section">
+            <img src="assets/settings robust receipt customization.png" alt="Receipt Customization"
+                class="visual-tour-image">
+            <p style="text-align: center; font-style: italic;">Live preview helps you design the perfect thermal
+                receipt.</p>
+        </div>
+
+        <h3 id="peripherals">🖨️ Hardware Connections</h3>
+        <p>Manage your devices in <em>Settings > Peripherals</em>.</p>
+
+        <h4>Printer Configuration</h4>
+        <ul>
+            <li><strong>Connection Types:</strong>
+                <ul>
+                    <li><strong>USB:</strong> Direct local connection.</li>
+                    <li><strong>Network:</strong> Connect via IP address (WiFi/LAN).</li>
+                    <li><strong>Bluetooth:</strong> Wireless printing support.</li>
+                </ul>
+            </li>
+            <li><strong>Continuous Print:</strong> Toggle for specific thermal printer models that support continuous
+                feed.</li>
+        </ul>
+
+        <h4>Cash Drawer</h4>
+        <ul>
+            <li><strong>Port:</strong> Specify the COM port or USB path.</li>
+            <li><strong>Pulse Duration:</strong> Adjust the voltage trigger duration (default: 100ms) to ensure the
+                drawer kicks open without damaging the solenoid.</li>
+        </ul>
+
+        <div class="visual-tour-section">
+            <img src="assets/settings robust peripheral connections.png" alt="Peripheral Connections"
+                class="visual-tour-image">
+            <p style="text-align: center; font-style: italic;">Reliable connection management for all your hardware.</p>
+        </div>
+    </div>
+
+    <!-- 7. NETWORKING -->
+    <div id="networking">
+        <h2>7. Networking & Sync</h2>
+        <p>Opensauce: POS features a robust <strong>Offline-First</strong> architecture.</p>
+
+        <h3>How it Works</h3>
+        <div class="note">
+            The system uses a local database (IndexedDB) to store all actions immediately, ensuring the app never
+            freezes even if the internet goes down.
+        </div>
+
+        <h4>Sync Logic</h4>
+        <ol>
+            <li><strong>Action Queue:</strong> Every Create, Update, or Delete action (e.g., New Order, Update Product)
+                is added to a <code>SyncQueue</code> in the local database.</li>
+            <li><strong>Online Detection:</strong> The app listens for the system's "Online" event.</li>
+            <li><strong>Processing:</strong>
+                <ul>
+                    <li>When online, the app iterates through the queue.</li>
+                    <li>It sends requests to the server (via Electron IPC or HTTP).</li>
+                    <li>Successful syncs remove the item from the queue.</li>
+                    <li>Failures are retried up to 3 times before being flagged.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h4>Data Types Synced</h4>
+        <ul>
+            <li><strong>Orders:</strong> Sales data is critical and prioritized.</li>
+            <li><strong>Products:</strong> Inventory changes made offline will propagate when reconnected.</li>
+            <li><strong>Customers:</strong> New customer profiles are queued.</li>
+        </ul>
+
+        <div class="tip">
+            <h4>☁️ Optional: Online Sync (R99/pm)</h4>
+            <p>Want to check your sales from home? Our Online Database Sync allows you to:</p>
+            <ul>
+                <li>View real-time sales on your phone.</li>
+                <li>Keep a secure cloud backup of your inventory.</li>
+                <li>Manage multiple branches from one account.</li>
+            </ul>
+            <p>Contact us to activate this for just <strong>R99 per month</strong>.</p>
+        </div>
+    </div>
+
+
+    <!-- 8. INTERFACE GALLERY -->
+    <div id="visual-tour">
+        <h2>8. Interface Gallery</h2>
+        <p>A comprehensive view of the OpenSauce POS ecosystem through real system screenshots.</p>
+
+        <!-- POS MAIN SCREEN -->
+        <div id="pos-screen-tour" class="visual-tour-section">
+            <h3>🛒 Point of Sale</h3>
+            <img src="assets/point of sale.png" alt="Point of Sale" class="visual-tour-image">
+            <div class="tour-grid">
+                <div class="tour-feature">
+                    <h4>Menu Access</h4>
+                    <p>Collapsible sidebar for quick navigation between modules without losing your active cart.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVENTORY DASHBOARD -->
+        <div id="inventory-tour" class="visual-tour-section">
+            <h3>📦 Inventory Dashboard</h3>
+            <img src="assets/inventory management.png" alt="Inventory Management" class="visual-tour-image">
+            <p style="text-align: center; font-style: italic;">Direct control over your product catalog and supply
+                chain.</p>
+        </div>
+
+        <div class="section-break"></div>
+
+        <!-- SALES ANALYTICS -->
+        <div id="analytics-tour" class="visual-tour-section">
+            <h3>📊 Reporting & Analytics</h3>
+            <img src="assets/reports analytics advanced.png" alt="Advanced Analytics" class="visual-tour-image">
+            <div class="tour-grid">
+                <div class="tour-feature">
+                    <h4>Deep Insights</h4>
+                    <p>Track everything from hourly sales performance to individual category growth.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-break"></div>
+
+    <!-- 8. TECH MANUAL -->
+    <div id="tech-manual">
+        <h2>8. Technical Manual</h2>
+        <p>This section is for developers and system administrators maintaining the Opensauce codebase.</p>
+
+        <h3>System Architecture</h3>
+        <div class="diagram">
+            ┌───────────────────────────────────────┐
+            │ Electron Wrapper │
+            ├────────────────────┬──────────────────┤
+            │ Backend Node.js │ Frontend React │
+            │ (Express Server) │ (Vite Renderer) │
+            │ [Port: 0] │ [Port: 5173] │
+            └─────────┬──────────┴─────────┬────────┘
+            │ │
+            SQLite DB IPC Bridge
+            (Local Data Store) (Secure Comm.)
+        </div>
+
+        <h4>Key Components:</h4>
+        <ul>
+            <li><strong>Electron (Main Process):</strong> Manages the application lifecycle. Spawns Node.js server as a
+                child process.</li>
+            <li><strong>Node.js Server:</strong> Express app handling API & Database (SQLite). Uses <strong>Port
+                    0</strong> (dynamic assignment).</li>
+            <li><strong>SQLite:</strong> Local data store in user's <code>AppData</code> directory.</li>
+        </ul>
+    </div>
+
+    <!-- 10. TROUBLESHOOTING -->
+    <div id="troubleshooting">
+        <h2>10. Troubleshooting Guide</h2>
+
+        <h4>Application Won't Start</h4>
+        <ul>
+            <li><strong>Node Version:</strong> Ensure you are using Node.js v18+.</li>
+            <li><strong>Reinstall:</strong> Run <code>npm install</code>.</li>
+        </ul>
+
+        <h4>Printer Not Printing</h4>
+        <ul>
+            <li>Check USB/Network connection.</li>
+            <li>Verify correct IP for network printers.</li>
+            <li>Use "Test Print" in Settings.</li>
+        </ul>
+    </div>
+
+    <!-- 11. ROADMAP -->
+    <div id="roadmap">
+        <h2>11. Product Roadmap</h2>
+
+        <div class="note">
+            <h4>📅 Early Adopter Benefits</h4>
+            <p>As an Early Adopter, you have a <strong>Lifetime License</strong>. You will receive the following
+                updates FREE as they launch:</p>
+            <ul>
+                <li><strong>Version 1.2:</strong> Integrated Airtime & Data Sales (Earn Commission!)</li>
+                <li><strong>Version 1.5:</strong> Electricity & Bill Payments</li>
+                <li><strong>Version 2.0:</strong> Android Handheld Support</li>
+            </ul>
+        </div>
+
+        <div class="phase-card">
+            <h3>Phase 1: The Stability Base (Current – v1.6)</h3>
+            <p><em>Focus: Market entry and core reliability.</em></p>
+            <ul>
+                <li><strong>Offline-First Architecture:</strong> Utilizing <strong>SQLite with Drizzle ORM</strong> to
+                    ensure the shop stays open during load shedding without needing internet.</li>
+                <li><strong>Hardware Integration:</strong> Full support for thermal printers, barcode scanners, and cash
+                    drawers via secure <strong>Electron IPC handlers</strong>.</li>
+                <li><strong>Role-Based Access:</strong> Clear distinction between <strong>Owner, Admin, and
+                        Cashier</strong> roles with protected owner accounts.</li>
+                <strong>R2,500 once-off</strong> lifetime license "early bird" deal.
+                </li>
+            </ul>
+        </div>
+
+        <div class="phase-card">
+            <h3>Phase 2: The Revenue Update (v1.7)</h3>
+            <p><em>Focus: Turning the POS into a profit center for merchants via Value-Added Services (VAS).</em></p>
+            <ul>
+                <li><strong>VAS Integration:</strong> Partnering with South African aggregators (e.g., Freepaid) to sell
+                    <strong>Airtime, Data, and Electricity</strong> directly from the POS interface.
+                </li>
+                <li><strong>Voucher Sales:</strong> Adding support for digital vouchers (Netflix, Uber, Google Play,
+                    1Voucher, Flash and more).
+                </li>
+                <li><strong>Security Hardening:</strong> Implementing <strong>Argon2/bcrypt PIN hashing</strong> and
+                    full
+                    API authentication to protect merchant wallets.</li>
+                <li><strong>Database Optimization:</strong> Adding indexes for high-volume retailers to maintain
+                    sub-millisecond search speeds.</li>
+            </ul>
+        </div>
+
+        <div class="phase-card">
+            <h3>Phase 3: The Payment Revolution (v1.8)</h3>
+            <p><em>Focus: Expanding payment flexibility for modern South African consumers.</em></p>
+            <ul>
+                <li><strong>Integrated Card Payments:</strong> Direct SDK integration with local providers for "one-tap"
+                    checkout.
+                </li>
+                <li><strong>Crypto "Scan-to-Pay":</strong> Enabling Bitcoin Lightning and Stablecoin payments via QR
+                    codes, with instant ZAR settlement for the merchant.</li>
+                <li><strong>Database Encryption:</strong> Implementing <strong>encryption-at-rest</strong> to safeguard
+                    all business and customer data on the local device.</li>
+                <li><strong>Audit Logging:</strong> Advanced event tracking to prevent internal shrinkage and simplify
+                    tax reporting.</li>
+            </ul>
+        </div>
+
+        <div class="phase-card">
+            <h3>Phase 4: The Mobile Expansion (v1.9)</h3>
+            <p><em>Focus: Portability and multi-store management.</em></p>
+            <ul>
+                <li><strong>Android/iOS Launch:</strong> Utilizing the existing <strong>Capacitor/Mobile hooks</strong>
+                    to launch native apps for handheld "Smart POS" devices.</li>
+                <li><strong>Multi-Store Sync:</strong> Activating the <strong>PostgreSQL sync</strong> feature
+                    (R99/month) to allow owners to manage multiple branches from one cloud dashboard.</li>
+                <li><strong>Supplier Portal:</strong> A built-in module for one-tap ordering from wholesalers when stock
+                    levels hit their "low-stock" pulse.</li>
+                <li><strong>AI Integration:</strong> Using AI to analyse sales data, provide informed decisions to boost
+                    sales, manage online orders via a chatbox (Whatsapp / Web).</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="company" class="company-info">
+        <h3>🤝 The "OpenSauce" Philosophy</h3>
+        <p>OpenSauce is built on the principle of transparency. Our core code is available on GitHub. This means:</p>
+        <ul>
+            <li><strong>Your data belongs to you.</strong></li>
+            <li>If you have a developer, they can build custom tools for you using our code.</li>
+            <li>We are building this with the South African business community.</li>
+        </ul>
+
+        <div class="visual-tour-section" style="max-width: 600px; margin: 2rem auto; box-shadow: none; border: none;">
+            <img src="assets/company info.png" alt="Company Info" class="visual-tour-image">
+        </div>
+        <br>
+        <p><em>Documentation Version 1.8 &mdash; Generated Jan 2026</em></p>
+    </div>
+
+    <div id="contact" class="company-info" style="border-top: none; padding-top: 0;">
+        <h2>12. Contact & Support</h2>
+        <div class="visual-tour-section" style="max-width: 600px; margin: 1rem auto; box-shadow: none; border: none;">
+            <img src="assets/contact.png" alt="Contact Us" class="visual-tour-image">
+        </div>
+        <p>For support, training, or custom integrations, please reach out to our dedicated team.</p>
+    </div>
+
+</body>
+
+</html>

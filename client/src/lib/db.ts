@@ -1,5 +1,5 @@
 import { openDB, IDBPDatabase } from 'idb';
-import type { Product, Order } from '@shared/schema';
+import type { Product, Order } from '../../../../shared/types';
 
 const DB_NAME = 'pos_db';
 const DB_VERSION = 1;
@@ -48,7 +48,7 @@ class IndexedDBStorage {
 
   async saveOrder(order: Order) {
     const db = await this.db;
-    await db.add('orders', order);
+    await db.put('orders', order);
   }
 
   async getOrders(): Promise<Order[]> {

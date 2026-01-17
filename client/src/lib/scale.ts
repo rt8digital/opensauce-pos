@@ -1,5 +1,3 @@
-import { ipcRenderer } from 'electron';
-
 export interface ScaleReading {
   weight: number;
   unit: 'kg' | 'lb' | 'oz' | 'g';
