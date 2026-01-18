@@ -10,11 +10,11 @@ export function initializeDefaultSchema(db: Database.Database): void {
     db.pragma('foreign_keys = ON');
 
     console.log('Starting initializeDefaultSchema...');
-    // Enable foreign key constraints
-    db.pragma('foreign_keys = ON');
 
-    // Create all tables in order to respect foreign key dependencies
+    // 1. Create all tables if they do not exist
     console.log('Creating tables if they do not exist...');
+
+    // Core Identity & Auth
     db.exec(`
         CREATE TABLE IF NOT EXISTS users (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -27,7 +27,7 @@ export function initializeDefaultSchema(db: Database.Database): void {
         )
     `);
 
-    // Settings table
+    // Settings & Configuration
     db.exec(`
         CREATE TABLE IF NOT EXISTS settings (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -41,6 +41,9 @@ export function initializeDefaultSchema(db: Database.Database): void {
             printer_type text DEFAULT 'usb',
             printer_ip text,
             printer_device_id text,
+            printer_codepage text DEFAULT 'cp437',
+            printer_model text,
+            printer_manufacturer text,
             scanner_device_id text,
             scanner_com_port text,
             scanner_type text DEFAULT 'usb',
@@ -122,7 +125,7 @@ export function initializeDefaultSchema(db: Database.Database): void {
         )
     `);
 
-    // Customers table
+    // CRM & Inventory
     db.exec(`
         CREATE TABLE IF NOT EXISTS customers (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -135,7 +138,6 @@ export function initializeDefaultSchema(db: Database.Database): void {
         )
     `);
 
-    // Categories table
     db.exec(`
         CREATE TABLE IF NOT EXISTS categories (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -145,7 +147,6 @@ export function initializeDefaultSchema(db: Database.Database): void {
         )
     `);
 
-    // Products table
     db.exec(`
         CREATE TABLE IF NOT EXISTS products (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -162,10 +163,10 @@ export function initializeDefaultSchema(db: Database.Database): void {
             weight_unit text,
             created_at integer DEFAULT (strftime('%s', 'now')) NOT NULL,
             FOREIGN KEY (category_id) REFERENCES categories(id)
-        );
+        )
     `);
 
-    // Discounts table
+    // Transactions
     db.exec(`
         CREATE TABLE IF NOT EXISTS discounts (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -176,7 +177,6 @@ export function initializeDefaultSchema(db: Database.Database): void {
         )
     `);
 
-    // Orders table (references users and customers)
     db.exec(`
         CREATE TABLE IF NOT EXISTS orders (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -198,7 +198,6 @@ export function initializeDefaultSchema(db: Database.Database): void {
         )
     `);
 
-    // Order items table
     db.exec(`
         CREATE TABLE IF NOT EXISTS order_items (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -214,12 +213,12 @@ export function initializeDefaultSchema(db: Database.Database): void {
         )
     `);
 
-    // Cash outs table
+    // Operations & Logs
     db.exec(`
         CREATE TABLE IF NOT EXISTS cash_outs (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
             user_id integer NOT NULL,
-            date text NOT NULL,
+            date integer NOT NULL,
             opening_cash text DEFAULT '0',
             cash_received text NOT NULL,
             change_given text NOT NULL,
@@ -232,7 +231,6 @@ export function initializeDefaultSchema(db: Database.Database): void {
         )
     `);
 
-    // Audit logs table
     db.exec(`
         CREATE TABLE IF NOT EXISTS audit_logs (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -250,27 +248,80 @@ export function initializeDefaultSchema(db: Database.Database): void {
         )
     `);
 
-    // Create indexes for performance
+    // Additional Support Tables (New)
     db.exec(`
-        CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);
-        CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category_id);
-        CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
-        CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
-        CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);
-        CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
-        CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
-        CREATE INDEX IF NOT EXISTS idx_cash_outs_user_id ON cash_outs(user_id);
-        CREATE INDEX IF NOT EXISTS idx_translations_source_text ON translations(source_text);
+        CREATE TABLE IF NOT EXISTS translations (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            source_text text NOT NULL,
+            language text NOT NULL,
+            translated_text text NOT NULL,
+            created_at integer DEFAULT (strftime('%s', 'now')) NOT NULL
+        )
     `);
 
-    // Migrations for existing databases: Add missing columns if they don't exist
-    const tables = ['orders', 'products', 'order_items', 'settings'];
-    for (const table of tables) {
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS bot_settings (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            welcome_message text DEFAULT 'Welcome to our store! How can I help you today?',
+            help_message text DEFAULT 'Available commands: menu, order [item], help',
+            unknown_command_message text DEFAULT 'Sorry, I didn''t understand that command. Type "help" for available commands.',
+            order_confirmation_message text DEFAULT 'Your order has been placed successfully!',
+            is_enabled integer DEFAULT 0,
+            business_name text,
+            business_phone text,
+            auto_reply integer DEFAULT 1,
+            queue_orders integer DEFAULT 1,
+            max_concurrent_chats integer DEFAULT 10,
+            response_delay integer DEFAULT 1
+        )
+    `);
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS whatsapp_queue (
+            id text PRIMARY KEY NOT NULL,
+            phone_number text NOT NULL,
+            message text NOT NULL,
+            status text DEFAULT 'pending' NOT NULL,
+            created_at integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+            sent_at integer,
+            attempts integer DEFAULT 0,
+            max_attempts integer DEFAULT 3
+        )
+    `);
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS whatsapp_consent (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            phone_number text NOT NULL UNIQUE,
+            consent_status text NOT NULL,
+            consent_given_at integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+            consent_revoked_at integer,
+            consent_source text DEFAULT 'whatsapp_bot' NOT NULL,
+            notes text
+        )
+    `);
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS user_preferences (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            user_id integer NOT NULL,
+            preference_key text NOT NULL,
+            preference_value text,
+            created_at integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+            updated_at integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    `);
+
+    // 2. CRITICAL: Migrations for existing databases - Run BEFORE indexes
+    console.log('Running column migrations for existing databases...');
+    const tablesToCheck = ['orders', 'products', 'order_items', 'settings'];
+    for (const table of tablesToCheck) {
         const columns = db.prepare(`PRAGMA table_info(${table})`).all() as any[];
         const columnNames = columns.map(c => c.name);
 
         if (table === 'orders') {
-            if (!columnNames.includes('status')) db.exec("ALTER TABLE orders ADD COLUMN status text DEFAULT 'completed' NOT NULL");
+            if (!columnNames.includes('status')) db.exec("ALTER TABLE orders ADD COLUMN status text DEFAULT 'pending' NOT NULL");
             if (!columnNames.includes('source')) db.exec("ALTER TABLE orders ADD COLUMN source text DEFAULT 'pos' NOT NULL");
             if (!columnNames.includes('cash_received')) db.exec("ALTER TABLE orders ADD COLUMN cash_received text");
             if (!columnNames.includes('change')) db.exec("ALTER TABLE orders ADD COLUMN change text");
@@ -290,36 +341,47 @@ export function initializeDefaultSchema(db: Database.Database): void {
         if (table === 'settings') {
             if (!columnNames.includes('advice_list')) db.exec("ALTER TABLE settings ADD COLUMN advice_list text DEFAULT '[]'");
             if (!columnNames.includes('auto_launch_enabled')) db.exec("ALTER TABLE settings ADD COLUMN auto_launch_enabled integer DEFAULT 0");
+            if (!columnNames.includes('printer_codepage')) db.exec("ALTER TABLE settings ADD COLUMN printer_codepage text DEFAULT 'cp437'");
+            if (!columnNames.includes('printer_model')) db.exec("ALTER TABLE settings ADD COLUMN printer_model text");
+            if (!columnNames.includes('printer_manufacturer')) db.exec("ALTER TABLE settings ADD COLUMN printer_manufacturer text");
+            if (!columnNames.includes('receipt_show_qr_code')) db.exec("ALTER TABLE settings ADD COLUMN receipt_show_qr_code integer DEFAULT 0");
         }
     }
 
-    // Insert default users if none exist
+    // 3. Create indexes for performance
+    console.log('Creating indexes...');
+    db.exec(`
+        CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);
+        CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category_id);
+        CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
+        CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+        CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);
+        CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
+        CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
+        CREATE INDEX IF NOT EXISTS idx_cash_outs_user_id ON cash_outs(user_id);
+        CREATE INDEX IF NOT EXISTS idx_translations_source_text ON translations(source_text);
+    `);
+
+    // 4. Default Data Initialization
     console.log('Checking for existing users...');
     const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
-    console.log(`Found ${userCount.count} users.`);
     if (userCount.count === 0) {
         console.log('Inserting default users...');
         const insertUser = db.prepare('INSERT INTO users (name, pin, role, is_owner) VALUES (?, ?, ?, ?)');
-
-        // Admin account (PIN: 888888)
         insertUser.run('Admin', '888888', 'admin', 1);
-
-        // Cashier account (PIN: 654321)
         insertUser.run('Cashier', '654321', 'cashier', 0);
-
         console.log('Default users created (Admin PIN: 888888, Cashier PIN: 654321)');
     }
 
-    // Insert sample products if none exist
     console.log('Checking for existing products...');
     const productCount = db.prepare('SELECT COUNT(*) as count FROM products').get() as { count: number };
-    console.log(`Found ${productCount.count} products.`); if (productCount.count === 0) {
+    if (productCount.count === 0) {
+        console.log('Seeding sample products...');
         const insertProduct = db.prepare(`
             INSERT INTO products (name, price, image, stock_quantity, barcode, category, cost) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `);
 
-        // Sample inventory items
         const sampleProducts = [
             ['Beef Burger', '85.00', '', 100, '001', 'Food', '45.00'],
             ['Cheese Burger', '95.00', '', 100, '002', 'Food', '50.00'],
@@ -336,16 +398,12 @@ export function initializeDefaultSchema(db: Database.Database): void {
         for (const product of sampleProducts) {
             insertProduct.run(...product);
         }
-
         console.log('Sample products seeded');
     }
 
-    // Insert default settings if none exist
     const settingsCount = db.prepare('SELECT COUNT(*) as count FROM settings').get() as { count: number };
     if (settingsCount.count === 0) {
-        db.prepare(`
-            INSERT INTO settings DEFAULT VALUES
-        `).run();
+        db.prepare(`INSERT INTO settings (id) VALUES (1)`).run();
     }
 
     console.log('Database schema initialized successfully');
